@@ -10,7 +10,7 @@
 <body>
 <div id="siteWrapper">
 	<div id="siteDescription" class="single">
-		<h3 class="entry-title">How to make a good dependency injection container ? Software good practices.</h3>
+		<h3 class="entry-title">How to make a dependency injection container? Software good practices</h3>
 	</div>
 	<div id="coreContent">
 		<div class="post single hentry">

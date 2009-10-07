@@ -1,142 +1,431 @@
-How to make a good dependency injection container? Software good practices
-===========================================================================
 
-This article, which is going to talk about many subjects, is based on a personal experience and investigations I had during the realisation of a piece of software, for my personal use. No more suspence, this software is a dependency container, used in a web framework project, as a main piece.
+This article is based on personal experiences and investigations I had during 
+the realisation of a piece of software, for my personal use. I've really 
+learned great things when working on it, and want to share it. So here they are.
 
+This article talks about the Spiral's DI Container, shipped with a homemade 
+framework I made with some friends, in order to learn how *all of this* works:
+Spiral. 
 
-Aims of this article
----------------------
+The DI container is also available on a standalone version. You can find the code 
+[on it's mercurialrepository](http://bitbucket.org/ametaireau/spiral/). 
 
-In this article, I'll talk to you about dependency injection, and especially, how to build a succesfully and easy extendable dependency injection container. This article will be divided into 5 parts. It's important to understand each part, in is totality.
+The current version this article describe is not yet finished (as of sept. 09)
+but is in an avanced state. and will be released as of nov. 09.
 
-I will talk about software architecture in general, but, also about good practices, and it can change the way you code your applications. In fact, if you don't already use inversion of control pattern, it **will** do change the way you code. Maybe am I a little optimistic ? Let's see !
+Introduction
+-------------
+
+We'll talk about dependency injection, and especially about our reflect when 
+working on this software. 
+
+This article aims to be readed by people that doesn't fully understand what is 
+dependency injection, but also by people who are fluent whith it.
+
+We'll try to talk about software good practices, and software architecture in 
+general. When making this piece of software, first goal was to learn, and
+to discover how this works. Re-invent the wheel, in order to know more about
+wheels... 
+
+This document is not a documentation about how we can use Spiral DI, but on 
+how we have *made* it.
+
+All exemple provided will be in PHP, but concepts we are talking
+can be (and are !) implemented in other languages.
+
+So, let's talk about dependency injection !
 
 
 How do we actually manage objects
-----------------------------------
+---------------------------------
 
-First of all, we have to explain, briefly, what is inversion of control, in order to completely understand all things we are gonna do.
-When you are making sofware, in an Object Oriented way, you create classes that will interact. 
+First of all, we have to explain, briefly, what is inversion of control. Start 
+with our daily bread: how we actually manage our objects.
 
-A common practice is to call some classes from others. You'll understand quickly what is inversion of control.
+When making sofware, in an object oriented way, we have to deal with classes, 
+and to make this classes interact. In practice, some of your classes are 
+dependent on other ones.
 
-Let's imagine we have a `Car` class, wich is dependent on a tire `MichelinTire` object. Here is an exemple of dependent code:
+During all our explaination, we gonna keep a simple exemple : Let's imagine we 
+are Alice, a young girl wich loves eating icecreams. We really love icecreams, 
+and especially the strawberrie's one. 
+
+Let's say that Alice is dependent on Strawberies ice creams.
 	
-	class RedCar {
-		protected $_tire = null;
+	class Alice {
 		
-		public function __construct(){
-			$this->_tire = new MichelinTire();
+		public function eatIcecream(){
+			$iceCream = new StrawberryIcecream();
+			$iceCream->eat();
 		}
 	}
 	
-When building the Car, constructor build for us the tire, and return us a great car, with the Tires already build in.
+When Alice eat an icecream, she always shose the strawberry one. Great, but, 
+in practice, her mum want's let Alice give a try to other tastes ! 
 
-##### This includes dependencies !
-The problem that appears is simple: our `Car` is now dependent on `MichelinTire`s. If, for instance, we want to put on another brand of `Tire`s, we can't ! 
+Actually, with this code implementation, it's not really possible to change 
+the eaten icecream
 
+Inversion of Control (IoC)
+--------------------------
 
-Inversion of control
----------------------
-
-##### Principle
+### Principle
 
 ![Don't call me, I'll call you!](articles/dependency-injection/holywood-principle.png)
 
-The solution to this problem is simple, we need to remove the dependency between our two objects.
+So, we need to remove dependencies between our two objects, in order to let Alice eat
+other icecreams tastes. How can we made this ? Have a look at the code!
 
-	class RedCar {
-		protected $_tire = null;
+	class Alice {
 		
-		public function __construct(Tire $tire){
-			$this->_tire = $tire;
+		public function eatIcecream(IceCream $icecream){
+			$iceCream->eat();
 		}
 	}	
 
-As you can see, the `Tire` is given in the constructor of our `Car`, and no more builded into the constructor. You can remember this as the **Hollywood principle** : _don't call me, I'll call you_, or in other worlds, dont use the `new` operator to create your objects inside our classes, but passes all your objects via constructors, or via setters.
+As you can see, when Alice eat an ice cream (when calling the `eatIcecream` 
+method), we have to pass it the wanted `Icecream`. So, it's not Alice wich 
+chose the taste of her icecream, *we* do.
 
-Here is an exemple using setters:
+You can remember this as the **Hollywood principle** : "_don't call me, I'll 
+call you_", or in other worlds, dont use the `new` operator to create your 
+objects inside our classes, but passes all your objects, by reference.
 
-	class RedCar {
-		protected $_tire = null;
+Alice can do some other things with this icecream, let fall it down,
+for instance, (thanks to the `releaseIcecream` method). We can chose to pass 
+to this method the icecream, or to pass the ice cream directly to Alice,
+letting her making the stuff she wants with.
+
+	class Alice {
+		protected $_icecream = null;
 		
-		public function setTire(Tire $tire){
-			$this->_tire = $tire;
+		public function setIcecream(IceCream $icecream){
+			$this->_icecream = $icecream;
+		}
+
+		public function eatIcecream(){
+			$this->_icecream->eat();
+		}
+
+		public function releaseIcecream(){
+			$this->_icecream->release();
 		}
 	}	
+
+Here, we can specify wich taste is good for Alice, and it's easier to 
+control Alice's icecreams dependencies.
+
+That's all for the inversion of control principle: its just inverting the 
+control flow of your applications by delegating at a higher level 
+the creation of objects.
+
+### Dependency injection
+
+Ok, now that the concept of inversion of control is clear in your head, it make 
+more sense to explain what is the dependency injection.
+
+In the `eatIcecream` method, we consider that our icecream object is already 
+given to Alice, it's really an useful behavior: we don't worry about how to get
+the icecream, but we consider we just have it, already. 
+ 
+In the precendent section, Alice was _dependent_ on the Icecream. 
+
+By inverting the control flow, Alice behavior is now more testable (using mocks 
+objects is now really simple, as setting a parameter, using setter, we'll 
+talk about tests later). 
+
+Our job (the Mum's job!) is to create and to pass the icecream to Alice ...
+
+To _inject_ is the main word. Dependency injection is just that: call our 
+setters or constructors. So, let's go ! 
+
+Mum's action:
+
+	$alice = new Alice();
+	$bananaIcecream = new BananaIcecream();
+	$alice->setIcecream($bananaIcecream);
+
+### A dependency injection container ?
+
+Exemple I took is voluntarily simple, to expose the concepts. 
+We just have two classes, and one dependency. 
+
+In important projects, with tons of classes and tons of dependencies, managing 
+object lifecycles can become a hard work !
+
+The dependency injection task can be automatised, and this is the aim of a 
+dependency injector container.
+
+Why "container" ? Because the principle of automatizing theses creation and 
+injection task is done thanks to a container, wich contains all dependencies information.
+
+Always with the same exemple, the dependency injection container will do the injection, 
+on his own. It'll do Mum's work for us.
+
+The final behavior we want to achieve, is that when calling alice, she comes with 
+an already injected icecream, ready to eat !
+
+	$alice = $container->getService('Alice');
+	$alice->eatIceCream();
+
+Here, the container had succefully given the right icecream to Alice (no matter 
+wich one, we just want to deal with icecreams !)
+
+If the icecream itself has been dependent on another object (let's say .. pinuts !)
+It's the container's role to resolve, in the right order, all dependencies, 
+keeping the object management simple for the developer (you!).
+
+The sofware concepts
+--------------------
+
+Now that you've fully understand what is dependency injection and inversion of control, 
+we can start to talk about **how** to make this dependency injection container.
+
+Concepts exposed here are simple concepts, and provide a structure for the 
+container, and allow us to see clearly what is the good place and role of 
+each class we made.
+
+Some Java dependency injection container uses annotation in the code to interact
+with the container. Here, whereas it's not the default and recommended behavior,
+it'll be possible. 
+
+In fact, it's possible to generate a Schema representation thanks to theses 
+annotations.
+
+### The Schema representation
+
+In the Schema, and in the DI in general, a "service" is an object managed by the
+depency injection container.
+
+As said in the precendent section, the Schema represents the way services and 
+classes are linked together. It describe the dependencies of our classes.
+
+If you know the abstract factory design pattern, the schema represents a sort
+of confgiguration for this abstract factory, when the container is the factory
+itself (or a sort of).
+
+Schema contains all informations about methods we have to call in order to 
+inject our objects, argument we have to inject, and all other information 
+useful at the injection time.
+
+In our exemple, the schema will contain information on wich `Icecream`  `Alice` 
+depends, and wich is the way to provide the good `Icecream` to the her 
+(the setIcecream method).
+
+As far as now, we have talked about basics dependency rules. The Schema can 
+handle many different types of Services, Methods and Arguments. In fact, 
+the method we choosen allow to extend the types easily. Because we wrote code
+that is on ly dependent on interfaces, it's possible to use any type of methods,
+the only condition is they have to implement oru interfaces.
+
+Here is the tree type of interfaces existing in the Schema:
+
+#### Services
+
+A service represents an object, so, here, the Icecream is a Service, and Alice
+is another one.
+A service is composed by:
+
+* a name
+* a set of methods
+* a way to be build
+* a scope
+
+Scope is the way to control the life cycle of our object: when requesting the 
+service more than one time, what we have to do ? Use the first builded service?
+Recreate one? Check in session if we already have one ? Scope tells us.
+
+Our DI container comes with a set of different services types:
+
+Default:
+	A simple service, composed by methods, and wich can be built as a simple 
+	object.
+
+Aliases:
+	A service wich is an alias for another one. Just the name is different. It
+	allow us to manage our dependencies in the time. "For now, it's an alias,
+	but maybe, one day,(haha) it'll be another type of service".
 	
-Maybe have you noticed that the `setTire` method is waiting for a `Tire`, and not for the special `MichelinTire`. You're right, and it allows us to be dependent, not on a special implementation of a Tire, but on **all** possible implementations of `Tire`s. In fact, `Tire` is the _interface_ of all our Tire.
+Inherited services:
+	Rather than repeating ourselves times and times, we can use
+	inheritance in our service definition. It's just like inheritance in 
+	programming: all methods and service you redefine or you add inside this
+	service will override the inherited service ones.
 
-That's all for the inversion of control principle: it just invert the flow of control of your applications by delegating at a higher level the creation of objects.
+#### Methods
 
-##### Dependency injection
+Each services contains Methods.
 
-Ok, now that the concept of inversion of control is clear in your head, it make more sense to explain what is the dependency injection.
+Methods are used to inject some parameters in our services, or defines some 
+ressources wich had to be called at the construction time. In the Alice's 
+exemple, one method is setIcecream.
 
-In the precendent section, the `Car` was _dependent_ on the `Tire`. By inverting the flow of control, our class is now more testable (using mocks objects is now really simple, as setting a parameter, using setter), but we have to create our `Tire`, and inject it into our `RedCar` object.
+A method is composed by:
 
-To _inject_ is the main word. Dependency injection is just that: call our setters or constructors. So, let's go !
+* a name, 
+* an optionnal classname
+* a set of arguments
+* information describing if it's static or not
 
-	$myTire = new MichelinTire();
-	$myCar = new RedCar();
-	$myCar->setTire($myTire);
-	
+Here is the different type of implemented methods:
 
-##### A dependency injection container ?
+Default:
+	Simple method, with arguments.
 
-In our case, it's really really simple, because we have just two classes, and one dependency. In important projects, with tons of classes and tons of dependencies, managing object lifecycles can become a hard work !
-The dependency injection task can be automatised, and this is the aim of a dependency injector.	
+Attribute methods:
+	Used to directly set public attributes `$service->attribute = $value`. 
+	This type of method can only contain one argument.
 
-Why "container" ? Because the principle of automatizing theses creation and injection task is done thanks to a container, wich contains all relation schema. 
+Callbacks:
+	Before, or after the creation of your service, you can call specific 
+	methods, called callback methods.
 
-Always with the same exemple, the dependency injection container will do the injection, on his own.
+#### Arguments
 
-Here is some important concepts that I've used when realising this software.
+Methods contains arguments, and there is different types of arguments. 
+Arguments aer the end of the chain service / method / argument. 
+Argument contains values, that are standard native PHP types.
+
+Here is the different types of arguments:
+
+Default: 
+	Native php types (int, string, float etc.)
+
+Container Argument:
+	This one represents the container itself. This option is used
+	only for services wich needs to use the container. This services
+	are called "ContainerAware" services
+
+Current Service Argument:
+	It's possible to use the injected service as argument, in practice, 
+	it's just used in callbacks methods, that need to be notified after
+	the creation of a service.
+
+Empty Value Argument:
+	A argument wich had no special value (container argument and service
+	argument extends this one)
+
+Service Reference Argument:
+	One of the most used type of argument. It represents another service.
+
+Use Reference Argument:
+	Sometimes, it's useful to use another service method to get a argument.
+	Think about configuration for exemple. 
+	This type of argument relies on another service method to be resolved.
 
 
-The concepts
-------------
+### Construction strategies
 
-##### The Schema representation
+Now that we have a Schema representation of our objects, we have to build
+(construct) them.
 
-Schema represents the way object and classes are linked together. It's this schema the most important thing in the overall concepts.
+We've choose to separate completely the construction logic and the definition
+logic. Schema is a definition step, and building our services, and injecting
+them is a construction step.
 
-The Schema contains all informations about methods we have to call to inject our objects, argument types, and all other information that can be useful to know at the injection time.
+Each Schema type relies on a construction strategy. There are as many types
+of construction strategies as schema definition types. (eg. Services, methods
+and arguments)
 
-In our exemple, the schema will contain information on wich `Tire` the `Car` is dependent, and wich is the way to provide the good `Tire` to the `Car` (let's say by setter).
+Each definition type caxn build itself, calling the `build` method. In fact, 
+internally, it's possible to build each schema type with different construction
+strategies. This way of processing allows us (and you!) to easily add new
+construction ways, with very tiny classes.
 
-###### Services
+### Builders
 
-###### Methods
+Defining the Schema with objects and classes is not really "cool", and it can
+take some time to describe each argument, service, method, by writing class calls
+etc.
 
-###### Arguments
+To avoid this anonying behavior, an interesting way to proceed is to provide 
+and use builders. Builders are objects which can read specific format Schemas, 
+to build the Schema representation (with objects) wich is comprehensive
+for us (and for the builder).
 
+The first type of builder wich comes to my mind, is the XML builder. It can read
+XML Schemas, and provide us the good type of Schema. XML builder comes with a 
+XSD definition file.
 
-##### Construction strategies
+We can imagine any other types of builders for the Schema.
 
-I've choosen to separate completely 
+The DI comes with theses dumpers:
 
-##### Builders
+* XML Builder
+* PHP Dumper
 
-Builders, are classes that are capable of building a schema object from other forms of schema, like XML, or YAML, or, why not, plain text, that are more human comprehensive.
+### Dumpers
 
+On the other side, it can be useful to use information provided by schema in
+order to create other types of contents.
 
-##### Dumpers
+It's possible to write the Schema thanks to a specific Builder, and to dump it
+in another format. Our DI comes with an intersting dumper, that allows us to 
+dump the schema in a graphic representation.
 
+It's easy to show the dependencies of your applications, by simply calling the
+DotDumper (Dot is the format used by [graphviz](www.graphviz.com)).
+
+Here is the list of built-in dumpers:
+
+* Text dumper
+* DotDumper
+* XML Dumper
 
 Implementation
 ---------------
+As we know how we want to architecture our component, we didn't know how to 
+start.
 
+Here are the specificities and different steps we passed in when realising 
+this component.
 
-##### Namespaces / PHP 5.3
+### Namespaces / PHP 5.3
+When started to reflect on this project, php 5.3 was not yet available, but, 
+because this version comes with some really interestant features (I think at
+late static binding and namespaces -- yes, theses features are from long time
+in another languages).
 
-##### Test driven developement
+The Dependency Injection container is separated into the folowing namespaces:
 
-##### Writing classes
+* The `Construction` namespace, wich contains all construction related classes 
+(the construction strategies)
+* The `Definition` namespace,  wich contains the Schema.
+* The `` namespace, wich contains Dumpers and Builders.
 
+### Test driven developement (TDD)
+With this project, I've created my first tests, and try to follow a Test Driven 
+Developement approach.
 
-One step further: how to extends the Container ?
--------------------------------------------------
+TDD says that you have to write your tests *before* startgin coding your 
+classes. At the beginning, I've been a bit upset, but it's a really good software
+dev. practice: Writing your tests before your classes require to fix the API, 
+and, because you're using your code just as you want to use it (and not as 
+it have to be used, once the implementation done), you finally have a good and
+usable API for your classes.
 
-Now that we know what we have to make, let's reflect on how this can be an useful tool in our future developements. The Dependency Injection is, when we're thinking about, just like a big [abstract factory][]. 
-It build objects and call some methods
+And, writing tests after writing the classes is a little boring, too...
+So, all tests have been made before coding the classes. Same for new features. 
+
+As we use inversion of control, all classes we made are simple to tests thanks
+to mocks objects.
+
+### Writing classes
+For writing classes, because we want to provide an easy extandable system, we 
+have almost systematically provided an Interface and an Abstract class.
+
+Writing classes is really simple once the architecture is clear. You can have
+a look on my code on the spiral's mercurial repository.
+
+There isn't a lot of things to say about it, except maybe if you don't already
+do: comment, comment comment your code !
+
+One step further
+----------------
+
+If you're interested in 
+
+Conclusion
+-----------
+I hope this article has bring to you some interest on how works a dependency
+injection container, and especially this one. 

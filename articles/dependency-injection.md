@@ -1,54 +1,54 @@
 
 This article is based on personal experiences and investigations I had during 
 the realisation of a piece of software, for my personal use. I've really 
-learned great things when working on it, and want to share it. So here they are.
+learned great things when working on it, and want to share it.
 
 This article talks about the Spiral's DI Container, shipped with a homemade 
-framework I made with some friends, in order to learn how *all of this* works:
+framework I made with friends, in order to learn how *all of this* works:
 Spiral. 
 
-The DI container is also available on a standalone version. You can find the code 
+The DI container is also available as a standalone version. You can find the code 
 [on it's mercurialrepository](http://bitbucket.org/ametaireau/spiral/). 
 
-The current version this article describe is not yet finished (as of sept. 09)
-but is in an avanced state. and will be released as of nov. 09.
+The current version of this article describe is not yet finished (as of sept. 09)
+but is in an advanced state. and will be released as of nov. 09.
 
 Introduction
 -------------
 
-We'll talk about dependency injection, and especially about our reflect when 
-working on this software. 
+We'll talk about dependency injection, and especially about reflections we had 
+while working on this software. 
 
-This article aims to be readed by people that doesn't fully understand what is 
-dependency injection, but also by people who are fluent whith it.
+This article aims to be read by people who don't fully understand what is 
+dependency injection, but also by people fluent whith this concept.
 
 We'll try to talk about software good practices, and software architecture in 
-general. When making this piece of software, first goal was to learn, and
-to discover how this works. Re-invent the wheel, in order to know more about
-wheels... 
+general. When making this software component, our first goal was to learn, and
+to discover how this works. Re-invent the wheel, in order to learn more about
+on wheels. 
 
 This document is not a documentation about how we can use Spiral DI, but on 
 how we have *made* it.
 
-All exemple provided will be in PHP, but concepts we are talking
+All exemple provided will be in PHP, but concepts we are talking discussing
 can be (and are !) implemented in other languages.
 
 So, let's talk about dependency injection !
 
 
-How do we actually manage objects
+How do we currently manage object
 ---------------------------------
 
 First of all, we have to explain, briefly, what is inversion of control. Start 
 with our daily bread: how we actually manage our objects.
 
 When making sofware, in an object oriented way, we have to deal with classes, 
-and to make this classes interact. In practice, some of your classes are 
-dependent on other ones.
+and to make theses classes interact. In practice, some of your classes are 
+dependent on from others.
 
-During all our explaination, we gonna keep a simple exemple : Let's imagine we 
+All alongthis document, we will keep a simple exemple : Let's imagine we 
 are Alice, a young girl wich loves eating icecreams. We really love icecreams, 
-and especially the strawberrie's one. 
+and especially those with strawberry flavour. 
 
 Let's say that Alice is dependent on Strawberies ice creams.
 	
@@ -60,11 +60,11 @@ Let's say that Alice is dependent on Strawberies ice creams.
 		}
 	}
 	
-When Alice eat an icecream, she always shose the strawberry one. Great, but, 
-in practice, her mum want's let Alice give a try to other tastes ! 
+When Alice eats an icecream, she always choose the strawberry one. Great, but, 
+one day, her mum want's Alice to try other tastes! 
 
 Actually, with this code implementation, it's not really possible to change 
-the eaten icecream
+the eaten icecream.
 
 Inversion of Control (IoC)
 --------------------------
@@ -83,17 +83,17 @@ other icecreams tastes. How can we made this ? Have a look at the code!
 		}
 	}	
 
-As you can see, when Alice eat an ice cream (when calling the `eatIcecream` 
-method), we have to pass it the wanted `Icecream`. So, it's not Alice wich 
-chose the taste of her icecream, *we* do.
+As you can see, when Alice eat icecream (when calling the `eatIcecream` 
+method), we have to pass her the wanted `Icecream`. So, it's not Alice that
+choose the taste of her icecream, *we* do.
 
 You can remember this as the **Hollywood principle** : "_don't call me, I'll 
-call you_", or in other worlds, dont use the `new` operator to create your 
-objects inside our classes, but passes all your objects, by reference.
+call you_", or in other terms, dont use the `new` operator to create your 
+objects inside your classes, but passes all your objects, by reference.
 
 Alice can do some other things with this icecream, let fall it down,
 for instance, (thanks to the `releaseIcecream` method). We can chose to pass 
-to this method the icecream, or to pass the ice cream directly to Alice,
+the icecream to this method, or to inject the ice cream directly to Alice,
 letting her making the stuff she wants with.
 
 	class Alice {
@@ -112,32 +112,32 @@ letting her making the stuff she wants with.
 		}
 	}	
 
-Here, we can specify wich taste is good for Alice, and it's easier to 
+Here, we can choos wich taste is good for Alice, and it's easier to 
 control Alice's icecreams dependencies.
 
-That's all for the inversion of control principle: its just inverting the 
+That's all for the inversion of control principle: its just the fact of inverting the 
 control flow of your applications by delegating at a higher level 
 the creation of objects.
 
 ### Dependency injection
 
-Ok, now that the concept of inversion of control is clear in your head, it make 
+Ok, now that the concept of inversion of control is clear in your head, it makes 
 more sense to explain what is the dependency injection.
 
 In the `eatIcecream` method, we consider that our icecream object is already 
-given to Alice, it's really an useful behavior: we don't worry about how to get
-the icecream, but we consider we just have it, already. 
+given to Alice, it's a really useful behavior: we don't worry about how to get
+the icecream anymore, we already have it (as a private property for exemple)
  
-In the precendent section, Alice was _dependent_ on the Icecream. 
+In the precendent section, Alice was _dependent_ on from the Icecream. 
 
-By inverting the control flow, Alice behavior is now more testable (using mocks 
+By inverting the control flow, Alice behavior is now more testable (using mock 
 objects is now really simple, as setting a parameter, using setter, we'll 
 talk about tests later). 
 
-Our job (the Mum's job!) is to create and to pass the icecream to Alice ...
-
-To _inject_ is the main word. Dependency injection is just that: call our 
-setters or constructors. So, let's go ! 
+Our job (the Mum's one!) is to create and to pass the icecream to Alice.
+To _inject_ is the main word. Dependency injection is just that: call your 
+setters or constructors, injecting the right objects when needed. 
+So, let's go ! 
 
 Mum's action:
 
@@ -156,11 +156,11 @@ object lifecycles can become a hard work !
 The dependency injection task can be automatised, and this is the aim of a 
 dependency injector container.
 
-Why "container" ? Because the principle of automatizing theses creation and 
-injection task is done thanks to a container, wich contains all dependencies information.
+Why "container" ? Because the automatic creation and injection is done
+thanks to a container, wich contains all dependencies information.
 
 Always with the same exemple, the dependency injection container will do the injection, 
-on his own. It'll do Mum's work for us.
+on its own. It'll do Mum's work for us.
 
 The final behavior we want to achieve, is that when calling alice, she comes with 
 an already injected icecream, ready to eat !

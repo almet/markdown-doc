@@ -1,4 +1,3 @@
-
 This article is based on personal experiences and investigations I had during 
 the realisation of a piece of software, for my personal use. I've really 
 learned great things when working on it, and want to share it.
@@ -147,13 +146,13 @@ Mum's action:
 
 ### A dependency injection container ?
 
-Exemple I took is voluntarily simple, to expose the concepts. 
-We just have two classes, and one dependency. 
+Exemple taken is voluntarily simple, to expose the concepts clearly:
+we just have two classes, and one dependency. 
 
-In important projects, with tons of classes and tons of dependencies, managing 
+In important projects, with lot of classes and dependencies, handle
 object lifecycles can become a hard work !
 
-The dependency injection task can be automatised, and this is the aim of a 
+The dependency injection task can be automatised, and it's the aim of a 
 dependency injector container.
 
 Why "container" ? Because the automatic creation and injection is done
@@ -172,37 +171,29 @@ Here, the container had succefully given the right icecream to Alice (no matter
 wich one, we just want to deal with icecreams !)
 
 If the icecream itself has been dependent on another object (let's say .. pinuts !)
-It's the container's role to resolve, in the right order, all dependencies, 
+it's the container's role to resolve, in the right order, all dependencies, 
 keeping the object management simple for the developer (you!).
 
-The sofware concepts
---------------------
+Sofware concepts
+-----------------
 
-Now that you've fully understand what is dependency injection and inversion of control, 
-we can start to talk about **how** to make this dependency injection container.
+Now that you're fluent with dependency injection and inversion of control, 
+we can start to talk about **how** to make a dependency injection container.
 
-Concepts exposed here are simple concepts, and provide a structure for the 
-container, and allow us to see clearly what is the good place and role of 
-each class we made.
-
-Some Java dependency injection container uses annotation in the code to interact
-with the container. Here, whereas it's not the default and recommended behavior,
-it'll be possible. 
-
-In fact, it's possible to generate a Schema representation thanks to theses 
-annotations.
+Concepts exposed here are simple, provides a structure for the container, 
+and allow us to see clearly what is the good place and role of each class 
+we made.
 
 ### The Schema representation
 
 In the Schema, and in the DI in general, a "service" is an object managed by the
-depency injection container.
+depency injection container. As said in the precendent section, the Schema 
+represents the way services and classes are linked together. It describe the 
+dependencies of our classes.
 
-As said in the precendent section, the Schema represents the way services and 
-classes are linked together. It describe the dependencies of our classes.
-
-If you know the abstract factory design pattern, the schema represents a sort
-of confgiguration for this abstract factory, when the container is the factory
-itself (or a sort of).
+If you know the [abstract factory pattern](http://en.wikipedia.org/wiki/Abstract_factory), 
+you can see the schema as a confguration when the container is the 
+factory itself (or a kind of).
 
 Schema contains all informations about methods we have to call in order to 
 inject our objects, argument we have to inject, and all other information 
@@ -210,19 +201,22 @@ useful at the injection time.
 
 In our exemple, the schema will contain information on wich `Icecream`  `Alice` 
 depends, and wich is the way to provide the good `Icecream` to the her 
-(the setIcecream method).
+(the `setIcecream` method).
 
 As far as now, we have talked about basics dependency rules. The Schema can 
-handle many different types of Services, Methods and Arguments. In fact, 
-the method we choosen allow to extend the types easily. Because we wrote code
-that is on ly dependent on interfaces, it's possible to use any type of methods,
-the only condition is they have to implement oru interfaces.
+handle many different types of Services, Methods and Arguments. 
 
-Here is the tree type of interfaces existing in the Schema:
+We tried to facilitate the extention steps, to create and extend these types easily. 
+All code we wrote is only dependent on a set of interfaces. So, it's possible to use 
+any type of methods, arguments or services. They just have to implement 
+the right interface.
+
+Here is the tree type of interfaces existing in the Schema: Services, 
+Methods and Attibutes.
 
 #### Services
 
-A service represents an object, so, here, the Icecream is a Service, and Alice
+A service represents an object. Here, the Icecream is a Service, and Alice
 is another one.
 A service is composed by:
 
@@ -347,12 +341,25 @@ The first type of builder wich comes to my mind, is the XML builder. It can read
 XML Schemas, and provide us the good type of Schema. XML builder comes with a 
 XSD definition file.
 
+Some Java dependency injection container 
+([Google Juice](http://code.google.com/p/google-guice/) and 
+[Spring](www.springsource.org) uses annotation in the code to interact with 
+the container. 
+
+Annotations are text, in comments, wich provide information on what have to be
+injected, and how. 
+
+Whereas it's not the default and recommended behavior, it'll be possible in 
+Spiral's DI. In fact, by generating a Schema representation thanks to theses 
+annotations.
+
 We can imagine any other types of builders for the Schema.
 
 The DI comes with theses dumpers:
 
 * XML Builder
-* PHP Dumper
+* PHP Builder (with a fluent interface)
+* Annotations (uses reflection to get annotation in classes and build the schema)
 
 ### Dumpers
 
@@ -404,28 +411,30 @@ and, because you're using your code just as you want to use it (and not as
 it have to be used, once the implementation done), you finally have a good and
 usable API for your classes.
 
-And, writing tests after writing the classes is a little boring, too...
-So, all tests have been made before coding the classes. Same for new features. 
+Making theses tests before coding the classes as another interest: we think about
+test scenarios we didnt imagine otherwise. It's require from us that we **think**
+on all possible scenarios.
+
+Another good reason to do this, is that writing tests after writing the classes 
+is a little boring...
 
 As we use inversion of control, all classes we made are simple to tests thanks
-to mocks objects.
+to [mocks objects](http://en.wikipedia.org/wiki/Mock_object).
 
 ### Writing classes
 For writing classes, because we want to provide an easy extandable system, we 
-have almost systematically provided an Interface and an Abstract class.
+have almost systematically provided an Interface and an Abstract class, for 
+each concept that can be extended.
 
 Writing classes is really simple once the architecture is clear. You can have
-a look on my code on the spiral's mercurial repository.
+a look on my code on the [spiral's mercurial repository](http://bitbucket.org/ametaireau/spiral/src/)
 
 There isn't a lot of things to say about it, except maybe if you don't already
-do: comment, comment comment your code !
-
-One step further
-----------------
-
-If you're interested in 
+do: comment, comment comment your code, it's really an important thing to think
+about guys wich want to understand how all of this works
 
 Conclusion
 -----------
 I hope this article has bring to you some interest on how works a dependency
-injection container, and especially this one. 
+injection container, and especially this one, and have focuses your interest 
+on using some good practices within your projects. 

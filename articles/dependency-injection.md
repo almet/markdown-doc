@@ -1,10 +1,10 @@
 This article is based on personal experience and investigation I had to do during 
 the realisation of a piece of software for my personal use. I've really 
-learned great things when working on it, and I want to share it.
+learned great things while working on this, and I want to share it.
 
 This article talks about the Spiral's DI Container, shipped with a homemade 
-framework I made with friends, in order to learn how *all of this* works:
-Spiral. 
+framework I am working on with friends, in order to learn how *all of this* works:
+Spiral.
 
 The DI container is also available as a standalone version. You can find the code 
 [on it's mercurial repository](http://bitbucket.org/ametaireau/spiral/). 
@@ -22,7 +22,7 @@ This article aims to be accessible by people who don't fully understand dependen
 injection as well as confirmed users of the concept.
 
 We'll try to talk about software good practices, and software architecture in 
-general. When making this software component, our first goal was to learn, and
+general. While making this software component, our first goal was to learn, and
 to discover how DI really works. Re-invent the wheel, in order to learn more about wheels. 
 
 This document is not a documentation about how we can use Spiral DI, but on 
@@ -63,7 +63,7 @@ Let's say that Alice is dependent on Strawberry ice cream.
 When Alice eats an icecream, she always choose the strawberry one. Great, but, 
 one day, her mum wants Alice to try other tastes! 
 
-Actually, with this code implementation, it's not really possible to change 
+Currently, with this code implementation, it's not really possible to change 
 the eaten icecream.
 
 Inversion of Control (IoC)
@@ -85,7 +85,7 @@ other icecream tastes. How ? Have a look at the code:
 
 As you can see, when Alice eats icecream (when calling the `eatIcecream` 
 method), we have to pass her the wanted `Icecream`. So, it's not Alice that
-chooses the taste of her icecream, *we* do.
+chooses the taste of her icecream anymore, *we* do.
 
 You can remember this as the **Hollywood principle** : "_don't call me, I'll 
 call you_", or in other terms, dont use the `new` operator to create your 
@@ -125,16 +125,16 @@ Ok, now that the concept of inversion of control is clear in your head, it makes
 more sense to explain what is the dependency injection.
 
 In the `eatIcecream` method, we consider that our icecream object is already 
-given to Alice, it's really an useful behavior: we don't worry about how to get
+given to Alice, it's really a useful behavior: we don't matter about how to get
 the icecream anymore, we already have it (as a private property for exemple)
  
-In the precendent section, Alice was _dependent_ on the Icecream. 
+In the precedent section, Alice was _dependent_ on the Icecream. 
 
 By inverting the control flow, Alice behavior is now more testable (using mock 
 objects is now really simple, as setting a parameter, using setters, we'll 
 talk about tests later). 
 
-Our job (the Mum's one!) is to create and to pass the icecream to Alice.
+Now, our job (the Mum's one!) is to create and to pass the icecream to Alice.
 To _inject_ is the correct word. Dependency injection is just that: call your 
 setters or constructors, injecting the right objects when needed. 
 So, let's go ! 
@@ -147,10 +147,10 @@ Mum's action:
 
 ### A dependency injection container ?
 
-Exemple taken is voluntarily simple, to expose the concepts clearly:
+The above example is voluntarily simple, to expose the concepts clearly:
 we just have two classes, and one dependency. 
 
-In important projects, with lot of classes and dependencies, handling
+In important projects, with lot of classes and dependencies, managing
 objects lifecycle can become a hard work !
 
 The dependency injection task can be automatized, and it's the aim of a 
@@ -163,7 +163,7 @@ Still with the same example, the dependency injection container will do the inje
 on its own. It'll do Mum's work for us.
 
 The final behavior we want to achieve, is that when calling alice, she comes with 
-an already injected icecream, ready to eat !
+an already eat-ready injected icecream !
 
 	$alice = $container->getService('Alice');
 	$alice->eatIceCream();
@@ -175,13 +175,13 @@ If the icecream itself has been dependent on another object (let's say .. peanut
 it's the container's role to resolve, in the right order, all dependencies, 
 keeping the object management simple for the developer (you!).
 
-Sofware concepts
+Software concepts
 -----------------
 
 Now that you're fluent with dependency injection and inversion of control, 
 we can start to talk about **how** to make a dependency injection container.
 
-Concepts exposed here are simple, provides a structure for the container, 
+Concepts exposed here are simple, provide a structure for the container, 
 and allow us to see clearly what is the good place and role of each class 
 we made.
 
@@ -189,7 +189,7 @@ we made.
 ![The Schema, with services, methods and arguments](articles/dependency-injection/schema.png)
 
 In the Schema, and in the DI in general, a "service" is an object managed by the
-depency injection container. As said in the precendent section, the Schema 
+depency injection container. As said in the precedent section, the Schema 
 represents the way services and classes are linked together. It describes the 
 dependencies of our classes.
 
@@ -197,23 +197,23 @@ If you know the [abstract factory pattern](http://en.wikipedia.org/wiki/Abstract
 you can see the schema as a confguration when the container is the 
 factory itself (or a kind of).
 
-Schema contains all informations about methods we have to call in order to 
-inject our objects, argument we have to inject, and all other information 
-useful at the injection time.
+Schema contains all information about methods we have to call in order to 
+inject our objects, arguments we have to inject, and all other information 
+which is useful at the injection time.
 
 In our example, the schema will contain information on wich `Icecream`  `Alice` 
-depends, and wich is the way to provide the good `Icecream` to the her 
+depends, and wich is the way to provide the good `Icecream` to her 
 (the `setIcecream` method).
 
 As far as now, we have talked about basics dependency rules. The Schema can 
 handle many different types of Services, Methods and Arguments. 
 
-We tried to facilitate the extention steps, to create and extend these types easily. 
+We tried to facilitate the extension steps, to add new types easily. 
 All code we wrote is only dependent on a set of interfaces. So, it's possible to use 
-any type of methods, arguments or services. They just have to implement 
+any kind of methods, arguments or services. They just have to implement 
 the right interface.
 
-Here is the tree type of interfaces existing in the Schema: Services, 
+Here are the three interfaces that the Schema is dealing with: Services, 
 Methods and Attibutes.
 
 #### Services
@@ -224,12 +224,19 @@ A service is composed by:
 
 * a name
 * a set of methods
-* a way to be build
+* a building process
 * a scope
 
-Scope is the way to control the life cycle of our object: when requesting the 
-service more than one time, what we have to do ? Use the first builded service?
-Recreate one? Check in session if we already have one ? Scope tells us.
+Scope is the way to control the life cycle of our services in the container: 
+Does the service remain in the container during the whole script (singleton) or 
+is it instantly removed from it (prototype)?
+The actual instance of the injected object must be the same for all services if 
+the scope is defined as singleton, or each time a different one if the scope is set 
+to prototype.
+
+Other scopes could be imagined like the "session" scope that would provide the same instance 
+through a unique session, or a kind of "immortal" scope that would use persistence features to 
+make an instance immortal through user sessions.
 
 Our DI container comes with a set of different services types:
 
@@ -250,7 +257,7 @@ Inherited services:
 
 #### Methods
 
-Each services contains Methods.
+Each service contains Methods.
 
 Methods are used to inject some parameters in our services, or define some 
 ressources wich have to be called at the construction time. In the Alice 
@@ -259,7 +266,7 @@ exemple, one method is setIcecream.
 A method is composed by:
 
 * a name, 
-* an optionnal classname
+* an optionnal class name
 * a set of arguments
 * information describing if it's static or not
 
@@ -341,14 +348,14 @@ etc.
 
 ![Builders](articles/dependency-injection/builders.png)
 
-To avoid this anonying behavior, an interesting way to proceed is to provide 
+To avoid this anoying behavior, an interesting way to proceed is to provide 
 and use builders. Builders are objects that can read specific Schemas formats 
 to build the Schema representation (with objects) wich is understandable
 for us (and for the builder).
 
-The first type of builder coming to my mind, is the XML builder. It can read
-XML Schemas, and provide the good type of Schema. XML builder comes with a 
-XSD definition file.
+The first type of builder coming to my mind, is the XML builder. It is able to 
+read schemas defined in an XML based syntax, and provide the good type of Schema.
+Our XML builder comes with a XSD definition file.
 
 Some Java dependency injection container 
 ([Google Juice](http://code.google.com/p/google-guice/) and 
@@ -356,7 +363,7 @@ Some Java dependency injection container
 the container. 
 
 Annotations are text, in comments, wich provide information on what needs to be
-injected, and how. 
+injected, and how.
 
 Whereas it's not the default and recommended behavior, it'll be possible in 
 Spiral's DI to generate a Schema representation thanks to these 
@@ -364,7 +371,7 @@ annotations.
 
 We can imagine any other types of builders for the Schema.
 
-The DI comes with theses dumpers:
+The DI comes with theses builders:
 
 * XML Builder
 * PHP Builder (with a fluent interface)
@@ -392,7 +399,7 @@ Here is the list of built-in dumpers:
 
 Implementation
 ---------------
-Then, we knew how we wanted to architecture our component but we didn't knew where to 
+Then, we knew how we wanted to architecture our component but we didn't know where to 
 start.
 
 Here are the specificities and different steps we passed in when realising 
@@ -448,6 +455,6 @@ about guys who want to understand how all of this works
 Conclusion
 -----------
 I hope this article has brought to you some interest on how works a dependency
-injection container - especially this one - and drawed your interest
-in using some good practices within your projects. If you want to discuss about it, 
+injection container - especially this one - and egg you on 
+using some good practices within your projects. If you want to discuss about it, 
 feel free to contact me at alexis at supinfo dot com.

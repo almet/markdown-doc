@@ -409,7 +409,8 @@ The Dependency Injection container is separated into the folowing namespaces:
 * The `Construction` namespace, wich contains all construction related classes 
 (the construction strategies)
 * The `Definition` namespace,  wich contains the Schema.
-* The `` namespace, wich contains Dumpers and Builders.
+* The `Dumpers` namespace, wich contains Dumpers
+* The `Builders` namespace, wich contains Builders
 
 ### Test driven developement (TDD)
 With this project, I've created my first tests, and try to follow a Test Driven 

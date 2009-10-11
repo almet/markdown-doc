@@ -3,7 +3,7 @@
 
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>Dependency Injection &#8211; Using SpiralDi Container :  Not My Idea</title>
+	<title>How to make a dependency injection container using software good practices</title>
 	<link rel="stylesheet" href="themes/notmyidea/css/style.css" type="text/css" media="screen" charset="utf-8" />
 </head>
 

@@ -63,7 +63,7 @@ Let's say that Alice is dependent on Strawberry ice cream.
 When Alice eats an icecream, she always choose the strawberry one. Great, but, 
 one day, her mum wants Alice to try other tastes! 
 
-Currently, with this code implementation, it's not really possible to change 
+Actually, with this code implementation, it's not possible to change 
 the eaten icecream.
 
 Inversion of Control (IoC)
@@ -134,7 +134,7 @@ By inverting the control flow, Alice behavior is now more testable (using mock
 objects is now really simple, as setting a parameter, using setters, we'll 
 talk about tests later). 
 
-Now, our job (the Mum's one!) is to create and to pass the icecream to Alice.
+Now, our job (the Mum's one!) is to create and pass the icecream to Alice.
 To _inject_ is the correct word. Dependency injection is just that: call your 
 setters or constructors, injecting the right objects when needed. 
 So, let's go ! 
@@ -150,7 +150,7 @@ Mum's action:
 The above example is voluntarily simple, to expose the concepts clearly:
 we just have two classes, and one dependency. 
 
-In important projects, with lot of classes and dependencies, managing
+In important projects, with lot of classes and dependencies, handling
 objects lifecycle can become a hard work !
 
 The dependency injection task can be automatized, and it's the aim of a 
@@ -362,10 +362,10 @@ Some Java dependency injection container
 [Spring](www.springsource.org) uses annotation in the code to interact with 
 the container. 
 
-Annotations are text, in comments, wich provide information on what needs to be
+Annotations are text, that's fit to the class implementation wich provide information on what needs to be
 injected, and how.
 
-Whereas it's not the default and recommended behavior, it'll be possible in 
+Whereas it's not the default and recommended behavior, it is possible in 
 Spiral's DI to generate a Schema representation thanks to these 
 annotations.
 
@@ -439,6 +439,23 @@ is a little boring...
 
 As we use inversion of control, all classes we made are simple to test thanks
 to [mocks objects](http://en.wikipedia.org/wiki/Mock_object).
+
+### Interfaces
+
+In all our classes, we try the most to deal with interfaces, and not with specific
+implementations. why ? because dealing with interfaces allows us to switch the wanted
+implementation at each moment.
+
+
+All these interfaces represents a behavior described bellow.
+
+* Schema
+* Service
+* Method
+* Argument
+* Container
+* Dumper
+* Builder
 
 ### Writing classes
 To write classes, and because we wanted to provide an easy and extendable system, we 

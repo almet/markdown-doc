@@ -9,7 +9,7 @@ Spiral.
 The DI container is also available as a standalone version. You can find the code 
 [on it's mercurial repository](http://bitbucket.org/ametaireau/spiral/). 
 
-The current version of this article is not complete (as of sept. 09)
+The current version of Spiral DI component is not complete (as of sept. 09)
 but is in an advanced state. and will be released as of nov. 09.
 
 Introduction
@@ -267,7 +267,10 @@ Default:
 
 Attribute methods:
 	Used to directly set public attributes `$service->attribute = $value`. 
-	This type of method can contain only one argument.
+	This type of method can contain only one argument. 
+    It can appear weird to manage attributes like methods. It's important 
+    to understand the difference between methods and arguments. Arguments 
+    represents values whereas methods represents ways to set them.
 
 Callbacks:
 	Before, or after the creation of your service, you can call specific 
@@ -301,7 +304,7 @@ Empty Value Argument:
 Service Reference Argument:
 	One of the most used type of argument. It represents another service.
 
-Use Reference Argument:
+Service Resolved Argument:
 	Sometimes, it's useful to use another service method to get a argument.
 	Think about configuration for exemple. 
 	This type of argument relies on another service method to be resolved.
@@ -365,6 +368,8 @@ The DI comes with theses dumpers:
 On the other side, it can be useful to use information provided by schema in
 order to create other types of contents.
 
+![The Dot Dumper in action](articles/dependency-injection/graphviz.png)
+
 It's possible to write the Schema thanks to a specific Builder, and to dump it
 in another format. Our DI comes with an interesting dumper, that allows us to 
 dump the schema in a graphic representation.
@@ -375,7 +380,7 @@ DotDumper (Dot is the format used by [graphviz](www.graphviz.com)).
 Here is the list of built-in dumpers:
 
 * Text dumper
-* DotDumper
+* Dot Dumper
 * XML Dumper
 
 Implementation

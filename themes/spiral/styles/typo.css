@@ -1,0 +1,65 @@
+/**
+ * Typography
+ */
+
+body
+{
+	font-family: "Bitstream Vera Sans", sans-serif;
+	font-size: 0.9em;
+}
+
+/*
+pour les H2 plutot une image
+*/
+h2
+{
+	padding-bottom: 50px;
+	font-size: 1em;
+}
+
+h3
+{
+	padding: 0 0 1em 40px;
+	font-size:2.3em;
+	font-weight:normal;
+	margin-bottom:5px;	
+	margin-top: 20px;
+	font-family: "Bitstream charter", serif;
+	color: #000;
+	font-weight: normal;
+	font-style: italic;
+	margin: 20px 50px 20px 100px; 
+	text-align: right;
+}
+
+h4
+{
+	padding: 10px 0 0.5em 0;
+	
+	font-family: "Bitstream charter", serif;
+	color: #c45300;
+	font-size: 2em;
+	font-weight: bold;
+}
+
+p
+{
+	padding: 0 0 1em 0;
+	
+	text-align: justify;
+}
+
+p,h5,pre,ul,h6
+{
+	padding: 10px 0 1em 40px;
+}
+
+ul
+{
+	padding-left: 70px;
+}
+
+img
+{
+	float: right;
+}

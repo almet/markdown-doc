@@ -529,6 +529,7 @@ font-size: 1em;
 }
 .hentry img{
   margin: 0 auto;
+  padding-left: 10px;
   border: 0px solid #ccc;
   float: right;
 }

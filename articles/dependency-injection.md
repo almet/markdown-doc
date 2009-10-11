@@ -40,6 +40,8 @@ How do we currently manage objects
 First of all, we have to explain, briefly, what is inversion of control. Start 
 with our daily bread: how we actually manage our objects.
 
+![Icecreams?](articles/dependency-injection/icecream.png)
+
 When making sofware in an object oriented way, we have to deal with classes, 
 and to make theses classes interact. In practice, some of your classes are 
 dependent on others.
@@ -184,6 +186,7 @@ and allow us to see clearly what is the good place and role of each class
 we made.
 
 ### The Schema representation
+![The Schema, with services, methods and arguments](articles/dependency-injection/schema.png)
 
 In the Schema, and in the DI in general, a "service" is an object managed by the
 depency injection container. As said in the precendent section, the Schema 
@@ -312,6 +315,8 @@ Service Resolved Argument:
 
 ### Construction strategies
 
+![Construction strategies](articles/dependency-injection/construction.png)
+
 Now that we have a Schema representation of our objects, we have to build
 (construct) them.
 
@@ -333,6 +338,8 @@ construction ways, with very tiny classes.
 Defining the Schema with objects and classes is not really "cool", and it can
 take some time to describe each argument, service, method, by writing class calls
 etc.
+
+![Builders](articles/dependency-injection/builders.png)
 
 To avoid this anonying behavior, an interesting way to proceed is to provide 
 and use builders. Builders are objects that can read specific Schemas formats 
@@ -368,7 +375,7 @@ The DI comes with theses dumpers:
 On the other side, it can be useful to use information provided by schema in
 order to create other types of contents.
 
-![The Dot Dumper in action](articles/dependency-injection/graphviz.png)
+![Dumpers](articles/dependency-injection/dumpers.png)
 
 It's possible to write the Schema thanks to a specific Builder, and to dump it
 in another format. Our DI comes with an interesting dumper, that allows us to 
@@ -441,4 +448,5 @@ Conclusion
 -----------
 I hope this article has brought to you some interest on how works a dependency
 injection container - especially this one - and drawed your interest
-in using some good practices within your projects.
+in using some good practices within your projects. If you want to discuss about it, 
+feel free to contact me at alexis at supinfo dot com.

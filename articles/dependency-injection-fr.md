@@ -1,25 +1,23 @@
+Réaliser un injecteur de dépendances, en utilisant de bonnes pratiques logicielles
+==================================================================================
+
 Cet article est basé sur mon experience personelle, ainsi que sur des recherches effectuées lors de 
 la réalisation d'un composant logiciel. J'ai alors réellement découvert des choses interessantes, et 
 souhaite les partager.
 
-Nous parlerons ici de l'injecteur de dépendences de Spiral, un framework maison dont je suis à l'origine, 
+Nous parlerons ici de l'injecteur de dépendences de Spiral, un framework maison dont je suis à l'origine
 avec quelques amis, et dont l'objectif principal est de découvrir les rouages des frameworks, ainsi que de nous initier à l'architecture logicielle.
+Ce document se veut etre une retranscription des diverses interrogations et reflexions que nous avons eu lorsque nous travaillons 
+sur cette bibliothèque.
 
-Cet injecteur de dépendances est également disponible dans une version __standalone__. Vous pouvez trouver le code sur son
- [dépôt mercurial](http://bitbucket.org/ametaireau/spiral/).
+Nous allons essayer de parler de bonnes pratiques logicielles. Alors que nous travaillions sur ce projet, notre principal but était de réellement 
+comprendre comment un injecteur de dépendances pouvait fonctionner. _Ré-inventer la roue_, pour mieux comprendre comment une roue fonctionne, en quelque sorte.
+
+L'injecteur de dépendances est disponible dans une version intégrée à Spiral ou dans une version _standalone_. Vous pouvez trouver le code sur le 
+ [dépôt mercurial](http://bitbucket.org/ametaireau/spiral/) du projet.
 
 A l'heure ou j'écris ces lignes, l'injecteur de dépendances de spiral n'est pas encore terminé (sept 09), mais est dans un état avancé,
 et devrait etre disponible en novembre 2009.
-
-Introduction
--------------
-
-Nous allons discuter d'injection de dépendances, et plus spécialement des reflections que nous avons eu alors que nous travaillions sur cette bibliothèque.
-
-Cet article s'adresse à la fois aux personnes qui ne sont pas famillières avec le concept d'injection de dépendances, et aux personnes qui le comprennent déjà.
-
-Nous allons essayer de parler de bonnes pratiques logicielles, et d'architecture logicielle, d'une manière plus générale. Alors que nous travaillions sur ce projet, notre
-principal but était de réellement comprendre comment un injecteur de dépendances pouvait fonctionner. Ré-inventer la roue, pour mieux comprendre comment une roue fonctionne.
 
 Aussi, l'objectif de ce document n'est pas de fournir une documentation exaustive sur l'utilisation du composant, mais d'expliquer *comment* nous l'avons réalisé. 
 
@@ -30,16 +28,16 @@ Donc, parlons un peu d'injection de dépendances !
 Comment gérons-nous nos objets
 ----------------------------------
 
-Avant toute chose, il est indispensable d'expliquer ce qu'est l'inversion de contrôle. Commençons par notre pain quotidien: la manière dont nous gérons nos objets. 
+Avant toute chose, il est indispensable que vous compreniez ce qu'est l'inversion de contrôle. Il s'agit de la manière dont nous gérons nos objets. 
 
-![une glace ?](articles/dependency-injection/icecream.png)
+![une glace ?](articles/dependency-injection-fr/icecream.png)
 
-Lorsque nous réalisons des logiciels, en utilisant le paradigme orienté objet, nous travaillons avc des classes, et, la majeure partie du temps, nous faisons intéragir ces classes entre elles.
+Lorsque nous réalisons des logiciels en utilisant le paradigme orienté objet, nous travaillons avec des classes, et, la majeure partie du temps, nous faisons intéragir ces classes entre elles.
 En pratique, certaines classes sont dépendantes d'autres classes.
 
-Pour mettre un exemple derrière ces concepts, tout au long de ce document, nous allons imaginer que nous sommes Alice, une jeune fille qui aime manger des glaces, qui adore manger des glaces, et spécialement celles à la fraise ! 
+Pour mettre un exemple derrière ces concepts, tout au long de ce document, imaginons que nous sommes Alice, une jeune fille qui adore manger des glaces, et spécialement celles à la fraise ! 
 
-Disons alors qu'Alice est dépendante de la glace à la fraise.
+On peut meme dire qu'Alice est dépendante de la glace à la fraise.
 	
 	class Alice {
 		
@@ -49,7 +47,7 @@ Disons alors qu'Alice est dépendante de la glace à la fraise.
 		}
 	}
 	
-Il est clair, au regard de cette implementation, qu'à chaque fois qu'alice mange une glace, il s'agit d'une glace à la fraise. Génial, mais, un jour, la mère d'Alice souhaite qu'Alice découvre d'autres parfums.
+Il est clair, au regard de cette implementation, qu'à chaque fois qu'Alice mange une glace, il s'agit d'une glace à la fraise. Génial, mais un jour, la mère d'Alice souhaite lui faire découvrir d'autres parfums.
 
 En réalité, avec cette implementation, il est impossible de changer la glace qu'Alice va manger.
 
@@ -58,11 +56,11 @@ Inversion of Control (IoC)
 
 ### Principe
 
-![Don't call me, I'll call you!](articles/dependency-injection/holywood-principle.png)
+![Don't call me, I'll call you!](articles/dependency-injection-fr/holywood-principle.png)
 
-Donc, il apparait necessaire de suprimmer les dépendances entre nos deux classes, pour permettre à Alice de gouter de nouveaux parfums. Comment ? 
+Il apparait donc necessaire de suprimmer les dépendances entre nos deux classes, pour permettre à Alice de gouter de nouveaux parfums. 
 
-C'est assez simple, regardez donc le code:
+Comment ? C'est assez simple, regardez donc le code:
 
 	class Alice {
 		
@@ -71,13 +69,13 @@ C'est assez simple, regardez donc le code:
 		}
 	}	
 
-Quand alice mange une glace (via la methode `mangerGlace`), nous devons lui passer la glace, ce n'est plus elle qui choisit, *nous* le faisons à sa place.
+Quand Alice mange une glace (via la methode `mangerGlace`), nous devons lui passer la glace, ce n'est plus elle qui choisit, *nous* le faisons à sa place.
 
-Ce principe est connu comme étant **le principe d'Hollywood**: "Ne vous apellez pas vous meme, on vous apellera", ou, en d'autres termes, n'utilisez pas l'opérateur `new` dans vos classes, 
-préférez plutôt passer vos objets par reference.
+Ce principe est connu comme étant **le principe d'Hollywood**: _"Ne vous appelez pas vous meme, on vous appellera"_. En d'autres termes, n'utilisez pas l'opérateur `new` dans vos classes, 
+préférez passer (ou qu'on vous passe) les objets par reference.
 
 Alice peut faire d'autres choses avec sa glace, la laisser tomber par terre par exemple (oups!), grace à la methode `lacherGlace`.
-Nous pouvons alors choisir de passer la glace à cette methode également, ou choisir de la donner directement à Alice, la laissant s'occuper du reste.
+Nous pouvons alors choisir de passer la glace à cette methode également, ou choisir de la donner directement à Alice, la laissant s'occuper du reste, et évitant de lui passer une glace pour chaque action.
 
 	class Alice {
 		protected $_glace = null;
@@ -95,21 +93,22 @@ Nous pouvons alors choisir de passer la glace à cette methode également, ou ch
 		}
 	}	
 
-Ici, nous pouvons choisir quel parfum est bon pour Alice, et il est assez facile de controller les dépendances d'Alice.
+Il est bien plus facile maintenant de choisir quel parfum est bon pour Alice, et de controller les dépendances d'Alice.
 
-C'est tout pour le principe d'inversionde contrôle ! Il s'agit simplement du fair d'inverser le flux de contrôle de vos application, en délégant à un plus haut niveau la création des objets.
+Et c'est tout pour le principe d'inversionde contrôle ! Il s'agit simplement du fait d'inverser le flux de contrôle de vos application, en délégant à un plus haut niveau la création des objets.
 
 ### Injection de dépendances
 
 Maintenant que le concept d'inversion de contrôle est clair, expliquons ce qu'est l'injection de dépendances.
 
 Dans la méthode `mangerGlace`, nous considérons que la glace en question est déjà donnée à Alice. C'est un comportement 
-vraiment utile: Nous n'avons pas à nous occuper de la manière dont la glace est arrivée là, nous l'avons déjà (dans une propriété privée par exemple)
+vraiment utile: Nous n'avons plus à nous occuper de la manière dont la glace est arrivée là, nous l'avons déjà (dans une propriété privée par exemple).
  
 Dans la section précédente, Alice était _dépendente_ de sa glace. En inversant le flux de controle, le comportement d'Alice vis à vis des glaces est plus facilement
-testable (utiliser des _mocks_, ou _bouchons_ est plus facile, nous parlerons de tests plus tard).
+testable (utiliser des _mocks_, ou _bouchons_ est aussi facile que de regler une propriété, nous parlerons de tests plus tard).
 
-Notre travail (celui de la mère d'Alice), est de créer les objets et de les passer à Alice. Les _injecter_ est le bon mot. En utilisant des mutateurs, ou en utilisant le constructeur, injectant les objets necessaires.
+Notre travail (celui de la mère d'Alice), est de créer les objets et de les passer à Alice. Les _injecter_ est le bon mot. 
+En utilisant des mutateurs, ou en utilisant le constructeur, injectant les objets necessaires.
 
 Allons-y:
 	
@@ -119,20 +118,20 @@ Allons-y:
 
 ### Un Conteneur ?
 
-L'exemple que j'ai choisi est volontairement simple, et je l'ai choisi afin d'expliquer les concepts clairement. 
+L'exemple que utilisé jusqu'ici est volontairement simple, et il à été choisi afin d'expliquer les concepts le plus clairement possible:
 Nous avons uniquement deux classes, et une dépendance.
 
 
 En pratique, il est assez rare qu'un projet soit aussi simple. Aussi, dans les projets importants, la gestion du cycle de vie des objets peut rapidement devenir un vrai casse tete.
 
-L'idéal est alors d'automatiser le processus de création et de gestion de ces cycles de vie. C'est le rôle du conteneur.
+L'idéal est alors d'automatiser le processus de création et de gestion de ces cycles de vie. Et il s'agit du rôle du conteneur.
 
 Pourquoi "conteneur" ? Parce que la création automatique et l'injection est effectuée grace à un objet, qui se charge de contenir toutes les informations sur les dépendances.
-Une fois les objets crées, le conteneur garde une référence vers ces derniers au cas ou nous en aurions encore besoin.
+Une fois les objets crées, le conteneur garde une référence vers ces derniers au cas ou nous en aurions encore besoin (voir les "scopes" plus loin)
 
-Toujours avec le meme exemple, le conteneur va se charger d'injecter les objets pour nous, tout seul. Il s'occupe de faire la travail de la Mère d'Alice.
+Le conteneur va se charger d'injecter les objets pour nous, et ainsi s'occuper de faire la travail de la Mère d'Alice à sa place.
 
-Le comportement final que nous souhaitons, est que lorsque nous appelerons Alice, via le conteneur, elle nous soit retourné avec une glace déjà injectée, prete à etre utilisée. 
+Nous souhaitons donc que lorsque nous appelerons Alice, via le conteneur, elle nous soit retourné avec une glace déjà injectée, prete à etre utilisée. 
 
 	$alice = $container->getService('Alice');
 	$alice->mangerGlace();
@@ -140,281 +139,263 @@ Le comportement final que nous souhaitons, est que lorsque nous appelerons Alice
 Ici, le conteneur à injecté la bonne glace à Alice (peu importe laquelle, nous souhaitons juste avoir une glace)
 
 Si la glace elle meme avait été dépendante d'autres objets (disons, des noix de coco par exemple), c'est le rôle du conteneur que de résoudre l'ensemble des dépendances, dans le bon ordre.
-laissant la tâche de la gestion des dépendances et des objets la plus simple possible pour le developeur (vous!). 
+simplifiant au maximum la tâche de gestion des dépendances entre les objets et les classes.
 
 Concepts logiciels
 -----------------
 
-Now that you're fluent with dependency injection and inversion of control, 
-we can start to talk about **how** to make a dependency injection container.
+Maintenant que les concepts d'inversion de contrôle et d'injection de dépendances sont clairs, nous pouvons commencer à parler de _comment_ nous avons
+réalisé cette bibliothèque.
 
-Concepts exposed here are simple, provides a structure for the container, 
-and allow us to see clearly what is the good place and role of each class 
-we made.
+Les concepts discutés ici sont des concepts assez simples, dont le principal objectif est de fournir une structure solide au conteneur. Chaque composant à ainsi un rôle et un
+emplacement précis au sein de notre architecture.
 
-### The Schema representation
-![The Schema, with services, methods and arguments](articles/dependency-injection/schema.png)
+### Le Schema
+![Le Schema, avec les services, methodes, et arguments](articles/dependency-injection-fr/schema.png)
 
-In the Schema, and in the DI in general, a "service" is an object managed by the
-depency injection container. As said in the precendent section, the Schema 
-represents the way services and classes are linked together. It describes the 
-dependencies of our classes.
+Dans le schema, et dans l'injecteur de dépendances en général, un "service" est un objet qui est géré par le conteneur. 
 
-If you know the [abstract factory pattern](http://en.wikipedia.org/wiki/Abstract_factory), 
-you can see the schema as a confguration when the container is the 
-factory itself (or a kind of).
+Le schema représente les liens entre les diferents services et classes. Il décrit les dépendances de nos objets.
 
-Schema contains all informations about methods we have to call in order to 
-inject our objects, argument we have to inject, and all other information 
-useful at the injection time.
+Si vous connaissez le patron de conception de fabrique abstraite, vous pouvez vous représenter le schema comme une configuration alors que le conteneur
+serait la fabrique elle meme (ou quelque chose d'approchant).
 
-In our example, the schema will contain information on wich `Icecream`  `Alice` 
-depends, and wich is the way to provide the good `Icecream` to the her 
-(the `setIcecream` method).
+Le schema contiens toutes les informations sur les methodes qui doivent etres appelées pour injecter les objets, le type des arguments qui doivent etre passés et tout type
+d'information qui peut etre utile au moment de l'injection.
 
-As far as now, we have talked about basics dependency rules. The Schema can 
-handle many different types of Services, Methods and Arguments. 
+Pour en revenir à notre exemple, le schema contiendrait des informations sur le type de glace qui doit etre passée à Alice (Une glace à la fraise bien sur!), et sur la manière de donner cette glace à Alice (via la méthode `setGlace()`)
 
-We tried to facilitate the extention steps, to create and extend these types easily. 
-All code we wrote is only dependent on a set of interfaces. So, it's possible to use 
-any type of methods, arguments or services. They just have to implement 
-the right interface.
+Jusqu'à maintenant, nous avons parlé de dépendances simples, mais le schema peut gérer differents types de services, méthodes et arguments.
 
-Here is the tree type of interfaces existing in the Schema: Services, 
-Methods and Attibutes.
+Voici les trois types que comporte le schema: les `Services`, les `Methods` et les `Attibutes`.
 
 #### Services
 
-A service represents an object. Here, the Icecream is a Service, and Alice
-is another one.
-A service is composed by:
+Un service représente un objet. Dans notre exemple, la Glace et Alice sont des services.
 
-* a name
-* a set of methods
-* a way to be build
-* a scope
+Un service se compose de: 
 
-Scope is the way to control the life cycle of our object: when requesting the 
-service more than one time, what we have to do ? Use the first builded service?
-Recreate one? Check in session if we already have one ? Scope tells us.
+* un nom
+* un ensemble de méthodes
+* une manière de se construire
+* une portée (scope)
 
-Our DI container comes with a set of different services types:
+La portée d'un service défini comment la durée de vie des services doit etre gérée par le conteneur: Est-ce que le service doit rester dans le conteneur pendant toute
+la durée du script (singleton), ou doit il etre systématiquement supprimé après avoir été construit (prototype)?  
 
-Default:
-	A simple service, composed by methods, and wich can be built as a simple 
-	object.
+L'instance de l'objet courant peut etre la meme pour l'ensemble des services si la portée du service est définie comme étant un _singleton_, ou etre à chaque fois différente si
+la portée est définie comme _prototype_. 
 
-Aliases:
-	A service wich is an alias for another one. Just the name is different. It
-	allows us to manage our dependencies in the time. "For now, it's an alias,
-	but maybe, one day,(haha) it'll be another type of service".
+D'autres types de portées peuvent etres imaginées comme une portée de "session", qui retournerait la meme instance durant une session unique, ou une sorte de portée "immortelle", 
+qui retournerait toujours le meme objet, en faisant persister cet objet.
+
+L'injecteur de dépendances est fourni avec les types de service suivant: 
+
+Defaut
+:	Un service "simple", composé de méthodes, et qui peut etre constrit comment un simple objet.
+
+Alias
+:	Un alias vers un autre service. Seul le nom est different. Ce type de service permet de gérer facilement les dépendances dans le temps.
+	"Pour le moment, il s'agit d'un alias, mais peut etre qu'un jour nous aurons besoin d'un autre type de service".
 	
-Inherited services:
-	Rather than repeating ourselves multiple times, we can use
-	inheritance in our service definition. It's just like inheritance in 
-	programming: all methods and services you redefine or add inside this
-	service will override the inherited services.
+Héritage de services
+:	Plutôt que de se répeter maintes et maintes fois lors de la description de services qui se ressemblent, il est possible d'utiliser l'héritage.
+	Cela ressemble grandement à l'héritage de classes: les méthodes que vous redéfinissez ou ajoutez dans les services enfants écraseront ceux des parents.
 
-#### Methods
+#### Méthodes
 
-Each services contains Methods.
+Chaque service contiens des méthodes. 
 
-Methods are used to inject some parameters in our services, or define some 
-ressources wich have to be called at the construction time. In the Alice 
-exemple, one method is setIcecream.
+Une méthode permet d'injecter certains parametres dans nos services, ou de définir certaines ressources qui doivent etre appelées au moment de la construction. 
+Dans le cas d'Alice, `setGlace()` est une méthode.
 
-A method is composed by:
+Une méthode est composée de:
 
-* a name, 
-* an optionnal classname
-* a set of arguments
-* information describing if it's static or not
+* un nom, 
+* optionellement, un nom de classe
+* une liste d'arguments
+* une information disant si la methode est statique ou non
 
-Here is the different types of implemented methods:
+Voici les differents types de méthodes actuellement implémentées: 
 
-Default:
-	Simple method, with arguments.
+Defaut
+:	Une simple méthode, avec des arguments. Peut etre une méthode statique 
 
-Attribute methods:
-	Used to directly set public attributes `$service->attribute = $value`. 
-	This type of method can contain only one argument. 
-    It can appear weird to manage attributes like methods. It's important 
-    to understand the difference between methods and arguments. Arguments 
-    represents values whereas methods represents ways to set them.
+Attributs
+:	Utilisé pour regler directement les propriétés en utilisant les attributs publics de l'objet ($service->attribut = $valeur`). 
+	Ce type de méthode peut contenir uniquement un argument.
+	Il peut paraître étrange de gérer les attributs comme des méthodes. En réalité, il est important de comprendre la différence entre une méthode et un argument.
+	Alors qu'un argument représente une valeur, une méthode représente une manière d'utiliser ces arguments. 
+	Dès lors, il parait plus logique de gérer les attributs comme des méthodes.
 
-Callbacks:
-	Before, or after the creation of your service, you can call specific 
-	methods, called callback methods.
+Rappels (callbacks)
+:	Avant, on après la création de vos services, il est possible d'apeller des méthodes spécifiques, apellées methodes de rappel. 
 
 #### Arguments
 
-Methods contains arguments, and there are different types of arguments. 
-Arguments are the end of the chain service / method / argument. 
-Argument contains values, that are standard native PHP types.
+Les méthodes contiennent donc des arguments, et il existe plusieurs types d'arguments également. 
+Les arguments sont le bout de la chaine services / methodes / arguments. 
 
-Here are the different types of arguments:
+Défaut
+: 	Types PHP natifs (int, string, float etc) 
 
-Default: 
-	Native php types (int, string, float etc.)
+Conteneur
+:	Il est possible d'injecter directement le conteneur. Ce type d'argument n'est utilisé que par les services qui necessitent d'utiliser le conteneur.
+	Ils sont apellées services "ContainerAware". 
 
-Container Argument:
-	This one represents the container itself. This option is used
-	only for services that needs to use the container. These services
-	are called "ContainerAware" services.
+Service courant
+:	Il est possible d'injecter le service en cours, et de l'utiliser comme argument. En pratique, ceci est actuellement utile pour les méthodes de rappel (callback)
 
-Current Service Argument:
-	It's possible to use the injected service as an argument. In practice, 
-	it's just used in callbacks methods, that need to be notified after
-	the creation of a service.
+Argument vide:
+	Il s'agit d'un type d'argument qui na pas de valeur. L'argument "conteneur" et "service courant" étendent ce type. Attention, l'argument vide est différent de null. 
 
-Empty Value Argument:
-	A argument wich has no special value (container argument and service
-	argument extends this one)
+Référence à un service
+:	C'est un des types d'argument le plus utilisé, il représente un autre service.
 
-Service Reference Argument:
-	One of the most used type of argument. It represents another service.
-
-Service Resolved Argument:
-	Sometimes, it's useful to use another service method to get a argument.
-	Think about configuration for exemple. 
-	This type of argument relies on another service method to be resolved.
+Argument résolu grace aux services
+:	Parfois, il est utile d'utiliser un service pour récupérer un argument, je pense à la configuration entres autres.
+	Ce type d'argument utilise donc une méthode spécifique d'un autre service pour etre résolu. 
 
 
-### Construction strategies
+### Strategies de construction
 
-![Construction strategies](articles/dependency-injection/construction.png)
+![Strategies de construction](articles/dependency-injection-fr/construction.png)
 
-Now that we have a Schema representation of our objects, we have to build
-(construct) them.
+Maintenant que nous avons un schéma qui représente les relations entre nos services, nous allons nous occuper de la construction de ces services...
 
-We've choosen to separate completely the construction logic and the definition
-logic. Schema is a definition step, and building our services, and injecting
-them is a construction step.
+Nous avons choisi de séparer completement les logiques de construction et de définition, pour permettre de favoriser un maxium d'usage pour l'un et l'autre des composants.
+Le Schéma est un tache qui est effectuée lors de la définition des informations, et l'injection des propriétés est une étape de la construction de nos services.
 
-Each Schema type relies on a construction strategy. There are as many types
-of construction strategies as schema definition types. (eg. Services, methods
-and arguments)
+Chaque type, dans le schema, utilise un type de strategie pour se construire. Il y à donc des strategies de construction pour les services, les methodes et les arguments. 
 
-Each definition type can build itself, calling the `build` method. In fact, 
 internally, it's possible to build each schema type with different construction
-strategies. This way of processing allows us (and you!) to easily add new
-construction ways, with very tiny classes.
+L'intéret d'utiliser des strategies de consntruction, c'est de permettre à chacun de nos types, dans le schema, de se construire _lui meme_, en utilisant la méthode `build()`.
+En interne, il est possible d'utiliser des strategies de construction différentes, et d'en changer à tout moment.
 
-### Builders
+Ce comportement suit, en fait, [le patron de conception strategie](http://fr.wikipedia.org/wiki/Strat%C3%A9gie_(patron_de_conception)).
 
-Defining the Schema with objects and classes is not really "cool", and it can
-take some time to describe each argument, service, method, by writing class calls
-etc.
+### Builders / Monteurs
 
-![Builders](articles/dependency-injection/builders.png)
+Puisque nous parlons de patrons de conception (design patterns), parlons du motif "Monteur". 
 
-To avoid this anonying behavior, an interesting way to proceed is to provide 
-and use builders. Builders are objects that can read specific Schemas formats 
-to build the Schema representation (with objects) wich is understandable
-for us (and for the builder).
+Vous serez sans doute d'accord avec moi pour dire qu'écrire un schema entièrement à la main, en utilisant les classes dont nous avons parlé
+un peu plus haut peut s'avérer rapidement assez pénible. En tout cas, pour l'avoir expérimenté lors de l'écriture des tests, je ne suis pas vraiment
+_fan_...
 
-The first type of builder coming to my mind, is the XML builder. It can read
-XML Schemas, and provide the good type of Schema. XML builder comes with a 
-XSD definition file.
+Une solution pratique consiste à utiliser le motif _Monteur_ (ou _Builder_, la version anglaise est plus jolie). 
+L'idée est, grosso modo, d'écrire le schema sous une forme sympathique pour nous, developeurs, et d'utiliser une classe intéermédiaire
+pour transformer notre représentation du schema dans la représentation compréhensible par notre composant.
 
-Some Java dependency injection container 
-([Google Juice](http://code.google.com/p/google-guice/) and 
-[Spring](www.springsource.org) uses annotation in the code to interact with 
-the container. 
+Cette classe intermédiaire _monte_ donc notre schema, en déchiffrant une autre structure de schema.
 
-Annotations are text, in comments, wich provide information on what needs to be
-injected, and how. 
+![Builders](articles/dependency-injection-fr/builders.png)
 
-Whereas it's not the default and recommended behavior, it'll be possible in 
-Spiral's DI to generate a Schema representation thanks to these 
-annotations.
+Le premier type de _monteur_ qui me vient à l'esprit (le plus pratique, en fait), est le _monteur_ XML. Il est capable de lire un schema, décrit au format XML, 
+et de construire le Schema en utilisant les objets de notre bibliothèque.
 
-We can imagine any other types of builders for the Schema.
+Les injecteurs de dépendances ([Google Juice](http://code.google.com/p/google-guice/) et 
+[Spring](www.springsource.org) utilisent des annotations directement dans le code, pour définir les règles d'injection (le schéma pour nous). 
 
-The DI comes with theses dumpers:
+Malgré qu'il ne s'agisse pas d'un comportement recommendé (les annotations ne sont exploitables que par un type d'injecteur, meme si une specification est actellement en cours),
+ il est possible d'utiliser la reflection sur un projet, et de la combiner a l'utilisation d'annotations pour déduire facilement la structure de notre schema.
 
-* XML Builder
-* PHP Builder (with a fluent interface)
-* Annotations (uses reflection to get annotation in classes and build the schema)
+Il s'agit également d'un _monteur_.
+
+Les monteurs suivants sont fournis de base:
+
+* Le monteur XML
+* Le monteur PHP, qui utilise une interface fluide, pour permettre des configurations de ce type: `$monteur->addService()->withMethod()`
+* Le monteur Reflexion (uses reflection to get annotation in classes and build the schema)
 
 ### Dumpers
 
-On the other side, it can be useful to use information provided by schema in
-order to create other types of contents.
+Un dumper est un objet qui copie des données d'un type de format vers un autre. Effectivement, il peut s'avérer utile d'avoir une manière simple de se représenter un 
+schema déjà défini.
 
-![Dumpers](articles/dependency-injection/dumpers.png)
+![Dumpers](articles/dependency-injection-fr/dumpers.png)
 
-It's possible to write the Schema thanks to a specific Builder, and to dump it
-in another format. Our DI comes with an interesting dumper, that allows us to 
-dump the schema in a graphic representation.
+Les dumpers permettent par exemple de représenter un schema sous une forme graphique, ou bien sous une forme plus compréhensible pour nous, avec un simple texte par exemple.
 
-It's easy to show the dependencies of your application, by simply calling the
-DotDumper (Dot is the format used by [graphviz](www.graphviz.com)).
+Il est donc vraiment facile de montrer les dépendances de vos projets, en utilisant simplement le dumper Dot (qui est le format utilisé par [graphviz](www.graphviz.com)).
 
-Here is the list of built-in dumpers:
+Voici la liste des dumpers :
 
-* Text dumper
-* Dot Dumper
-* XML Dumper
+* Le dumper texte
+* Le dumper Dot (graphviz)
+* Le dumper XML
+* Le dumper PHP
 
-Implementation
+Et le mieux, dans tout ça, c'est qu'il est possible d'écrire le Schéma en XML, de le charger grace au monteur, de faire des modifications à la volée dessus, et de l'enregistrer en XML !
+
+Implémentation
 ---------------
-Then, we knew how we wanted to architecture our component but we didn't knew where to 
-start.
 
-Here are the specificities and different steps we passed in when realising 
-this component.
+Voici quelques règles que nous avons suivi lors du developement en lui meme: 
 
 ### Namespaces / PHP 5.3
-When we started to think on this project, php 5.3 was not yet available but, 
-because this version comes with some really interestant features (name it a few : 
-late static binding and namespaces -- yes, these features are present since the dawn of ages
-in other languages)
+Alors que nous pensions à ce projet, PHP 5.3 n'était pas encore sorti, mais puisque cette version apporte des fonctionalités vraiment 
+interessantes (late static binding, namespaces et closures), nous avons choisi d'utiliser alors la version en cours de developement de PHP 5.3.
 
-The Dependency Injection container is separated into the folowing namespaces:
+Maintenant, PHP 5.3 est disponible en version stable, et permet de faire fonctionner notre projet.
 
-* The `Construction` namespace, wich contains all construction related classes 
-(the construction strategies)
-* The `Definition` namespace,  wich contains the Schema.
-* The `Dumpers` namespace, wich contains Dumpers
-* The `Builders` namespace, wich contains Builders
+Notre bibliothèque se sépare selon les espaces de noms suivants:
 
-### Test driven developement (TDD)
-With this project, I've created my first tests, and try to follow a Test Driven 
-Developement approach.
+* L'espace de nom `Construction`, qui contiens toutes les classes liées au concept de construction (les strategies de construction) 
+* L'espace de nom `Definition` , qui contiens le schema.
+* L'espace de nom `Transformation` qui contiens les Dumpers et les _Monteurs_ 
 
-TDD says that you have to write your tests *before* startgin coding your 
-classes. At the beginning, I've been a bit upset, but it's a really good software
-dev. practice: Writing your tests before your classes requires to fix the API, 
-and, because you're using your code just as you want to use it (and not as 
-it have to be used, once the implementation done), you finally have a good and
-usable API for your classes.
+### Developement piloté par les tests (TDD)
+Ce projet fut également l'occasion d'écrire nos premiers tests, pour finir par utiliser une approche pilotée par les tests. 
 
-Making these tests before coding the classes has another interest: we think about
-test scenarios we wouldn't have imagined otherwise. It requires us to **think**
-all possible scenarios.
+Le developement piloté par les tests préconise de réaliser ses tests **avant** d'écrire ses classes. Au début, ça chatouille un peu, mais on 
+comprends rapidement l'intéret de cette méthodologie, qui est une vraie bonne pratique.
 
-Another good reason to do this, is that writing tests after writing the classes 
-is a little boring...
+Ecrire ses tests avant d'avoir codé la classe nous oblige à la fois à privilégier une utilisation logique de nos composants, et à fixer les interfaces.
+Le code produit est réellement comme on souhaite l'utiliser, et non pas comme il est plus facile de l'implémenter.
 
-As we use inversion of control, all classes we made are simple to test thanks
-to [mocks objects](http://en.wikipedia.org/wiki/Mock_object).
+Ecrire des tests, c'est aussi penser à l'ensemble des scénarios d'utilisation de ces classes, meme les plus farfelus. Cela nous oblige à reflechir à tous ces cas
+d'utilisation, et ça fait le plus grand bien !
+ 
+Pour revenir aux tests, ils permettent de tester que notre application se comporte bien comme elle le devrait, mais cela permet aussi de detecter rapidement des regressions
+que de nouvelles fonctionalités peuvent apporter.
 
-### Writing classes
-To write classes, and because we wanted to provide an easy and extendable system, we 
-almost systematically provided an Interface and an Abstract class for 
-each concept that can be extended.
+Rapidement, on écrit des tests pour tout: bugs, idées, etc. Ca favorise vraiment le developement d'une application.
 
-Writing classes is really simple once the architecture is clear. You can have
-a look on my code on the [spiral's mercurial repository](http://bitbucket.org/ametaireau/spiral/src/)
+Un peu plus haut, je parlais de Mock objets (ou objets bouchon, en français). Je vous laisse consulter [l'article wikipédia sur les mocks]((http://en.wikipedia.org/wiki/Mock_object) pour vous faire une idée plus précise, mais
+il s'agit, rapidement, d'objets qui permettent de simuler le comportement d'un objet.
 
-There isn't a lot of things to say about it, except maybe if you don't already:
-comment, comment comment your code, it's really an important thing to think
-about guys who want to understand how all of this works
+### Interfaces
+
+Dans l'ensemble de nos classes, nous essayons de travailler avec les interfaces plutôt qu'avec des implémentations particulières. Pourquoi ?
+Parce que travailler avec des interfaces nous permet de changer à tout moment d'implementation ! 
+
+Chacune des interfaces ci dessous représente un comportement que nous avons décrit plus haut:
+
+* Schema
+* Service
+* Method
+* Argument
+* Container
+* Dumper
+* Builder
+
+### L'écriture des classes
+Pour écrire nos classes, et parce que nous souhaitons fournir un système facilement extensible, 
+nous fournissons quasi systématiquement une interface, et une classe abstraite, pour que chaque concept 
+puisse etre étendu facilement. 
+ 
+D'ailleurs, l'écriture des classes en elle meme est réellement simplissime, une fois que tous les concepts 
+ont étés décrit et sont clairs. 
+
+Vous pouvez regarder le code sur [le dépot mercurial de spiral](http://bitbucket.org/ametaireau/spiral/src/)
+
+Je ne vois pas grand chose à ajouter à propos de l'implémentation, si ce n'est peut etre, qu'il est indispensable de 
+commenter votre code: cela permet aux potentiels futur contributeurs de s'y retrouver facilement, et de comprendre comment tout cela fonctionne !
 
 Conclusion
 -----------
-I hope this article has brought to you some interest on how works a dependency
-injection container - especially this one - and drawed your interest
-in using some good practices within your projects. If you want to discuss about it, 
-feel free to contact me at alexis at supinfo dot com.
+
+J'espère que cet article vous aura interessé, vous aurez au moins appris comment nous avons choisi d'implémenter un injecteur de dépendances en utilisant quelques 
+bonnes pratiques logicielles !
+
+Si vous etes interessés pour discuter à ce propos, vous pouvez me contacter sur alexis [chez] supinfo [point] com

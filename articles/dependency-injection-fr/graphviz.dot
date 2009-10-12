@@ -1,0 +1,9 @@
+digraph sc {
+	ratio="compress"
+	node [fontsize="11" fontname="Myriad" shape="record"];
+	edge [fontsize="9" fontname="Myriad" color="grey" arrowhead="open" arrowsize="0.5"];
+
+	node_service_alice [label = "Alice \n LittleGirl", fillcolor="#eaeaea", style="filled"];
+	node_service_icecream [label = "icecream\n StrawberryIcecream", fillcolor="#eaeaea", style="filled"];
+	node_service_alice -> node_service_icecream [label = " setIceCream()"]
+}

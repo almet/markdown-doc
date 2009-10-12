@@ -194,7 +194,7 @@ represents the way services and classes are linked together. It describes the
 dependencies of our classes.
 
 If you know the [abstract factory pattern](http://en.wikipedia.org/wiki/Abstract_factory), 
-you can see the schema as a confguration when the container is the 
+you can see the schema as a configuration when the container is the 
 factory itself (or a kind of).
 
 Schema contains all information about methods we have to call in order to 
@@ -290,7 +290,6 @@ Callbacks:
 
 Methods contains arguments, and there are different types of arguments. 
 Arguments are the end of the chain service / method / argument. 
-Argument contains values, that are standard native PHP types.
 
 Here are the different types of arguments:
 
@@ -416,8 +415,7 @@ The Dependency Injection container is separated into the folowing namespaces:
 * The `Construction` namespace, wich contains all construction related classes 
 (the construction strategies)
 * The `Definition` namespace,  wich contains the Schema.
-* The `Dumpers` namespace, wich contains Dumpers
-* The `Builders` namespace, wich contains Builders
+* The `Transformation` namespace, wich contains Builders and Dumpers.
 
 ### Test driven developement (TDD)
 With this project, I've created my first tests, and try to follow a Test Driven 

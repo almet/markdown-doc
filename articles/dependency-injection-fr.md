@@ -11,11 +11,9 @@ Alors que nous travaillions sur ce projet, notre principal but était de réelle
 
 Aussi, l'objectif de ce document n'est pas de fournir une documentation sur l'utilisation du composant, mais bien d'expliquer *comment* nous l'avons réalisé.
 
-L'injecteur de dépendances est disponible dans une version intégrée à Spiral ou dans une version _standalone_. Vous pouvez trouver le code sur le
- [dépôt mercurial](http://bitbucket.org/ametaireau/spiral/) du projet.
+L'injecteur de dépendances est disponible dans une version intégrée à Spiral ou dans une version _standalone_. Vous pouvez trouver le code sur le [dépôt mercurial](http://bitbucket.org/ametaireau/spiral/) du projet.
 
-A l'heure ou j'écris ces lignes, l'injecteur de dépendances de spiral n'est pas encore terminé (sept 09), mais est dans un état avancé,
-et devrait être disponible en novembre 2009.
+A l'heure ou j'écris ces lignes, l'injecteur de dépendances de spiral n'est pas encore terminé (sept 09), mais est dans un état avancé, et devrait être disponible en novembre 2009.
 
 L'ensemble des exemples de ce document sont en PHP, mais les concepts discutés ici peuvent être (et sont!) implémentés dans d'autres langages.
 
@@ -68,8 +66,7 @@ Quand Alice mange une glace (via la méthode `mangerGlace`), nous devons lui pas
 
 Ce principe est connu comme étant **le principe d'Hollywood**: _"Ne nous appelez pas, nous vous appellerons"_. En d'autres termes, n'utilisez pas l'opérateur `new` dans vos classes, mais préférez passer (ou qu'on vous passe) les objets par référence.
 
-Alice peut faire d'autres choses avec sa glace, la laisser tomber par terre par exemple (oups!), grâce à la méthode `lacherGlace()`.
-Nous pouvons alors choisir de passer la glace à cette méthode également, ou choisir de la donner directement à Alice, la laissant s'occuper du reste, et évitant de lui passer une glace pour chaque action qui en nécessite une.
+Alice peut faire d'autres choses avec sa glace, la laisser tomber par terre par exemple (oups!), grâce à la méthode `lacherGlace()`. Nous pouvons alors choisir de passer la glace à cette méthode également, ou choisir de la donner directement à Alice, la laissant s'occuper du reste, et évitant de lui passer une glace pour chaque action qui en nécessite une.
 
     class Alice {
         protected $_glace = null;
@@ -97,13 +94,11 @@ Et c'est tout pour le principe d'inversion de contrôle (pas les glaces à la fr
 
 Maintenant que le concept d'inversion de contrôle est clair, expliquons ce qu'est l'injection de dépendances. Les deux concepts sont assez proches, et souvent utilisés de pair, mais il est important de bien saisir la frontière entre les deux.
 
-Dans la méthode `mangerGlace`, nous considérons que la glace en question est déjà donnée à Alice. C'est un comportement
-vraiment utile: Nous n'avons plus à nous occuper de la manière dont la glace est arrivée là, nous l'avons déjà (dans une propriété privée par exemple).
+Dans la méthode `mangerGlace`, nous considérons que la glace en question est déjà donnée à Alice. C'est un comportement vraiment utile: Nous n'avons plus à nous occuper de la manière dont la glace est arrivée là, nous l'avons déjà (dans une propriété privée par exemple).
  
 Dans la section précédente, Alice était _dépendante_ de sa glace. En inversant le flux de contrôle, le comportement d'Alice vis à vis des glaces est plus facilement contrôlable, et testable (utiliser des _mocks_, ou _bouchons de tests_ est aussi facile que de régler une propriété, nous parlerons de tests plus tard).
 
-Notre travail (celui de la mère d'Alice), est de créer les objets et de les passer à Alice. Les _injecter_ est le bon mot.
-En utilisant des mutateurs, ou en utilisant le constructeur, injectant les objets nécessaires.
+Notre travail (celui de la mère d'Alice), est de créer les objets et de les passer à Alice. Les _injecter_ est le bon mot. En utilisant des mutateurs, ou en utilisant le constructeur, injectant les objets nécessaires.
 
 Allons-y:
    
@@ -115,8 +110,7 @@ L'inversion de contrôle est donc le fait d'exposer des méthodes publiques (ou 
 
 ### Un Conteneur ?
 
-L'exemple que utilisé jusqu'ici est volontairement simple, et il à été choisi afin d'expliquer les concepts le plus clairement possible:
-Nous avons uniquement deux classes, et une dépendance.
+L'exemple que utilisé jusqu'ici est volontairement simple, et il à été choisi afin d'expliquer les concepts le plus clairement possible: Nous avons uniquement deux classes, et une dépendance.
 
 En pratique, vous serez surement d'accord pour dire qu'un projet est rarement aussi simple. Aussi, dans les projets importants, la gestion du cycle de vie des objets et de l'injection de leurs propriété peut rapidement devenir un vrai casse tête.
 
@@ -176,13 +170,13 @@ D'autres types de portées peuvent êtres imaginées comme une portée de "sessi
 
 L'injecteur de dépendances est fourni avec les types de service suivants:
 
-Défaut
+**Défaut**
 :	Un service "simple", composé de méthodes, et qui peut être construit comment un simple objet.
 
-Alias
+**Alias**
 :	Un alias vers un autre service. Seul le nom est différent. Ce type de service permet de gérer facilement les dépendances dans le temps. "Pour le moment, il s'agit d'un alias, mais peut être qu'un jour nous aurons besoin d'un autre type de service".
    
-Héritage de services
+**Héritage de services**
 :	Plutôt que de se répéter maintes et maintes fois lors de la description de services qui se ressemblent, il est possible d'utiliser l'héritage. Cela ressemble grandement à l'héritage de classes: les méthodes que vous redéfinissez ou ajoutez dans les services enfants écraseront ceux des parents.
 
 #### Méthodes
@@ -200,14 +194,13 @@ Une méthode est composée d':
 
 Voici les différents types de méthodes actuellement implémentées:
 
-Défaut
+**Défaut**
 :	Une simple méthode, avec des arguments. Peut être une méthode statique
 
-Attributs
-:	Utilisé pour régler directement les propriétés en utilisant les attributs publics de l'objet ($service->attribut = $valeur`).    Ce type de méthode peut contenir uniquement un argument. Il peut paraître étrange de gérer les attributs comme des méthodes. En réalité, il est important de comprendre la différence entre une méthode et un argument. 
-	Alors qu'un argument représente une valeur, une méthode représente une manière d'utiliser ces arguments. Dès lors, il parait plus logique de gérer les attributs comme des méthodes que comme des arguments.
+**Attributs**
+:	Utilisé pour régler directement les propriétés en utilisant les attributs publics de l'objet ($service->attribut = $valeur`).    Ce type de méthode peut contenir uniquement un argument. Il peut paraître étrange de gérer les attributs comme des méthodes. En réalité, il est important de comprendre la différence entre une méthode et un argument. Alors qu'un argument représente une valeur, une méthode représente une manière d'utiliser ces arguments. Dès lors, il parait plus logique de gérer les attributs comme des méthodes que comme des arguments.
 
-Rappels (callbacks)
+**Rappels (callbacks)**
 :	Avant ou après la création de vos services, il est possible d'appeler des méthodes spécifiques, appelées méthodes de rappel.
 
 #### Arguments
@@ -215,25 +208,23 @@ Rappels (callbacks)
 Les méthodes contiennent donc des arguments, et il existe plusieurs types d'arguments également.
 Les arguments sont le bout de la chaine services / méthodes / arguments.
 
-Défaut
+**Défaut**
 :	Types PHP natifs (int, string, float etc)
 
-Conteneur
-:	Il est possible d'injecter directement le conteneur. Ce type d'argument n'est utilisé que par les services qui nécessitent d'utiliser le conteneur.
-	Ils sont appelées services "ContainerAware".
+**Conteneur**
+:	Il est possible d'injecter directement le conteneur. Ce type d'argument n'est utilisé que par les services qui nécessitent d'utiliser le conteneur. Ils sont appelées services "ContainerAware".
 
-Service courant
+**Service courant**
 :	Il est possible d'injecter le service en cours, et de l'utiliser comme argument. En pratique, ceci est uniquement utile pour les méthodes de rappel (callback)
 
-Argument vide:
-    Il s'agit d'un type d'argument qui na pas de valeur. L'argument "conteneur" et "service courant" étendent ce type. Attention, l'argument vide est différent de null.
+**Argument vide**
+:    Il s'agit d'un type d'argument qui na pas de valeur. L'argument "conteneur" et "service courant" étendent ce type. Attention, l'argument vide est différent de null.
 
-Référence à un service
+**Référence à un service**
 :	C'est un des types d'argument le plus utilisé, il représente un autre service.
 
-Argument résolu grâce aux services
-:	Parfois, il est utile d'utiliser un service pour récupérer un argument, je pense à la configuration entres autres.
-    Ce type d'argument utilise donc une méthode spécifique d'un autre service pour être résolu.
+**Argument résolu grâce aux services**
+:	Parfois, il est utile d'utiliser un service pour récupérer un argument, je pense à la configuration entres autres. Ce type d'argument utilise donc une méthode spécifique d'un autre service pour être résolu.
 
 
 ### Stratégies de construction
@@ -317,19 +308,15 @@ Ce projet fut également l'occasion d'écrire nos premiers tests, pour finir par
 Le développement piloté par les tests préconise de réaliser ses tests **avant** d'écrire ses classes. Au début, ça chatouille un peu, mais on
 comprends rapidement l'intérêt de cette méthodologie, qui est une vraie bonne pratique.
 
-Écrire ses tests avant d'avoir codé la classe nous oblige à la fois à privilégier une utilisation logique de nos composants, et à fixer les interfaces.
-Le code produit est réellement comme on souhaite l'utiliser, et non pas comme il est plus facile de l'implémenter.
+Écrire ses tests avant d'avoir codé la classe nous oblige à la fois à privilégier une utilisation logique de nos composants, et à fixer les interfaces. Le code produit est réellement comme on souhaite l'utiliser, et non pas comme il est plus facile de l'implémenter.
 
-Écrire des tests, c'est aussi penser à l'ensemble des scénarios d'utilisation de ces classes, même les plus farfelus. Cela nous oblige à réfléchir à tous ces cas
-d'utilisation, et ça fait le plus grand bien !
+Écrire des tests, c'est aussi penser à l'ensemble des scénarios d'utilisation de ces classes, même les plus farfelus. Cela nous oblige à réfléchir à tous ces cas d'utilisation, et ça fait le plus grand bien !
  
-Pour revenir aux tests, ils permettent de tester que notre application se comporte bien comme elle le devrait, mais cela permet aussi de détecter rapidement des régressions
-que de nouvelles fonctionnalités peuvent apporter.
+Pour revenir aux tests, ils permettent de tester que notre application se comporte bien comme elle le devrait, mais cela permet aussi de détecter rapidement des régressions que de nouvelles fonctionnalités peuvent apporter.
 
 Rapidement, on écrit des tests pour tout: bugs, idées, etc. Ça favorise vraiment le développement d'une application.
 
-Un peu plus haut, je parlais de Mock objets (ou objets bouchon, en français). Je vous laisse consulter [l'article wikipédia sur les mocks]((http://en.wikipedia.org/wiki/Mock_object) pour vous faire une idée plus précise, mais
-il s'agit, rapidement, d'objets qui permettent de simuler le comportement d'un objet.
+Un peu plus haut, je parlais de Mock objets (ou objets bouchon, en français). Je vous laisse consulter [l'article wikipédia sur les mocks]((http://en.wikipedia.org/wiki/Mock_object) pour vous faire une idée plus précise, mais il s'agit, rapidement, d'objets qui permettent de simuler le comportement d'autres objets, ces derniers pouvant communiquer avec le suite de tests.
 
 ### Interfaces
 

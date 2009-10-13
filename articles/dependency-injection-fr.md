@@ -17,7 +17,7 @@ L'injecteur de dépendances est disponible dans une version intégrée à Spiral
 A l'heure ou j'écris ces lignes, l'injecteur de dépendances de spiral n'est pas encore terminé (sept 09), mais est dans un état avancé,
 et devrait être disponible en novembre 2009.
 
-L'ensemble des exemples de ce document sont en PHP, mais les concepts discutés ici peuvent (et sont!) implémentés dans d'autres langages
+L'ensemble des exemples de ce document sont en PHP, mais les concepts discutés ici peuvent être (et sont!) implémentés dans d'autres langages.
 
 Donc, parlons un peu d'injection de dépendances !
 
@@ -30,7 +30,7 @@ Avant toute chose, il est indispensable de bien comprendre ce qu'est l'inversion
 
 Lorsque nous réalisons des logiciels en utilisant le _paradigme_ orienté objet, nous travaillons avec des classes, et la majeure partie du temps, nous faisons interagir ces classes entre elles. En pratique, certaines classes sont dépendantes d'autres classes.
 
-Pour mettre un exemple derrière ces concepts, tout au long de ce document, nous allons nous mettre dans la peau d'Alice, une jeune fille qui adore manger des glaces, spécialement celles à la fraise !
+Pour mettre un exemple derrière ces concepts, tout au long de ce document, nous allons nous mettre dans la peau d'_Alice_, une jeune fille qui adore manger des glaces, spécialement celles à la fraise !
 
 Certains disent même qu'Alice est dépendante de la glace à la fraise.
    
@@ -88,6 +88,8 @@ Nous pouvons alors choisir de passer la glace à cette méthode également, ou c
     }   
 
 Il est bien plus facile maintenant de choisir la glace à donner a Alice, et ainsi de contrôler les dépendances d'Alice vis à vis de la glace.
+
+Ici, il subsiste des dépendances dans le code. Il s’agit de dépendances vis à vis de contrats (interfaces) et non d’implémentations données (classes), puisque j’ai choisi d’utiliser le paradigme de [programmation par contrats](http://fr.wikipedia.org/wiki/Programmation_par_contrat).
 
 Et c'est tout pour le principe d'inversion de contrôle (pas les glaces à la fraise, contrôler les dépendances)! Il s'agit _simplement_ du fait d'inverser le flux de contrôle de vos application, en délégant à un plus haut niveau la création des objets.
 

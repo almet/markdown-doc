@@ -142,7 +142,7 @@ Maintenant que les concepts d'inversion de contrôle et d'injection de dépendan
 Les concepts discutés ici sont des concepts assez simples, dont le principal objectif est de fournir une structure solide aux composants. Chaque composant à ainsi un rôle et un emplacement précis au sein de notre architecture.
 
 ### Le Schéma
-![Le Schéma, avec les services, méthodes, et arguments](articles/dependency-injection-fr/schéma.png)
+![Le Schéma, avec les services, méthodes, et arguments](articles/dependency-injection-fr/schema.png)
 
 Dans le schéma, et dans l'injecteur de dépendances en général, un "service" est un objet qui est géré par le conteneur.
 

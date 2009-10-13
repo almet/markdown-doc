@@ -110,7 +110,7 @@ L'inversion de contrôle est donc le fait d'exposer des méthodes publiques (ou 
 
 ### Un Conteneur ?
 
-L'exemple que utilisé jusqu'ici est volontairement simple, et il à été choisi afin d'expliquer les concepts le plus clairement possible: Nous avons uniquement deux classes, et une dépendance.
+L'exemple utilisé jusqu'ici est volontairement simple, et il à été choisi afin d'expliquer les concepts le plus clairement possible: Nous avons uniquement deux classes, et une dépendance.
 
 En pratique, vous serez surement d'accord pour dire qu'un projet est rarement aussi simple. Aussi, dans les projets importants, la gestion du cycle de vie des objets et de l'injection de leurs propriété peut rapidement devenir un vrai casse tête.
 

@@ -1,3 +1,6 @@
+How to make a dependency injection container, using software good practices
+===========================================================================
+
 This article is based on personal experience and investigation I had to do during 
 the realisation of a piece of software for my personal use. I've really 
 learned great things while working on this, and I want to share it.

@@ -1,10 +1,9 @@
 Réaliser un injecteur de dépendances, en utilisant de bonnes pratiques logicielles
 ==================================================================================
 
-Un injecteur de dépendances ? Peut être cela ne vous parles il pas vraiment. Tant mieux, l'objectif de cet article est d'éclaircir ces termes, et de présenter une implémentation que j'ai eu l'occasion de mettre en place, en essayant de m'appuyer sur de bonnes pratiques logicielles.
+Un injecteur de dépendances ? Peut être cela ne vous parle il pas vraiment. Tant mieux, l'objectif de cet article est d'éclaircir ces termes, et de présenter une implémentation que j'ai eu l'occasion de mettre en place, en essayant de m'appuyer sur de bonnes pratiques logicielles.
 
-Cet article est basé sur mon expérience personnelle, ainsi que sur des recherches effectuées lors de
-la réalisation d'un composant logiciel. L'objectif n'est aucunement d'imposer ma vision des choses, mais bel et bien de partager les interrogations, réflexion et découvertes que nous avons eu alors.
+Cet article est basé sur mon expérience personnelle, ainsi que sur des recherches effectuées lors de la réalisation d'un composant logiciel. L'objectif n'est aucunement d'imposer ma vision des choses, mais bel et bien de partager les interrogations, réflexion et découvertes que nous avons eu alors.
 
 Nous parlerons ici de l'injecteur de dépendances de Spiral, un framework maison réalisé avec quelques amis, et dont l'objectif principal est de découvrir les rouages des frameworks, ainsi que de nous initier aux bonnes pratiques logicielles.
 
@@ -88,7 +87,7 @@ Nous pouvons alors choisir de passer la glace à cette méthode également, ou c
         }
     }   
 
-Il est bien plus facile maintenant de choisir la glace à donner a Alice, et ainsi de contrôler les dépendances d'Alice vis à vis de la glace à la fraise.
+Il est bien plus facile maintenant de choisir la glace à donner a Alice, et ainsi de contrôler les dépendances d'Alice vis à vis de la glace.
 
 Et c'est tout pour le principe d'inversion de contrôle (pas les glaces à la fraise, contrôler les dépendances)! Il s'agit _simplement_ du fait d'inverser le flux de contrôle de vos application, en délégant à un plus haut niveau la création des objets.
 

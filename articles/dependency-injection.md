@@ -472,4 +472,4 @@ Conclusion
 I hope this article has brought to you some interest on how works a dependency
 injection container - especially this one - and egg you on 
 using some good practices within your projects. If you want to discuss about it, 
-feel free to contact me at alexis at supinfo dot com.
+feel free to contact `alexis at supinfo dot com`

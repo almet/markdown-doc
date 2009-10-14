@@ -120,7 +120,7 @@ Pourquoi "conteneur" ? Parce que la création automatique et l'injection est eff
 
 Le conteneur va donc se charger d'injecter les objets pour nous, en quelque sorte, il fait le travail de la Mère d'Alice à sa place.
 
-Nous souhaitons donc que lorsque nous appellerons Alice, via le conteneur, elle nous soit retourné avec une glace déjà injectée, prête à être mangée !
+Nous souhaitons donc que lorsque nous appellerons Alice, via le conteneur, elle nous soit retourné avec une glace prête à être mangée !
 
     $alice = $container->getService('Alice');
     $alice->mangerGlace();

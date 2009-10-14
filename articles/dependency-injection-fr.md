@@ -106,7 +106,7 @@ Allons-y:
     $glaceAuPaté = new GlaceAuPaté();
     $alice->setGlace($glaceAuPaté);
     
-L'inversion de contrôle est donc le fait d'exposer des méthodes publiques (ou des constructeurs) pour régler certaines propriétés, et l'injection de dépendances et le fait de, justement, injecter ces dépendances, utiliser ces méthodes et constructeurs.
+L'inversion de contrôle est donc le fait d'exposer des méthodes publiques (ou des constructeurs) pour régler certaines propriétés, et l'injection de dépendances est le fait de, justement, injecter ces dépendances, utiliser ces méthodes et constructeurs.
 
 ### Un Conteneur ?
 

@@ -162,7 +162,7 @@ Un service se compose d':
 * une manière de se construire
 * une portée (scope)
 
-La portée d'un service défini comment la durée de vie des services doit être gérée par le conteneur: Est-ce que le service doit rester dans le conteneur pendant toute la durée du script (singleton), ou doit il être systématiquement supprimé après avoir été construit (prototype)? 
+La portée d'un service définit comment la durée de vie des services doit être gérée par le conteneur: Est-ce que le service doit rester dans le conteneur pendant toute la durée du script (singleton), ou doit il être systématiquement supprimé après avoir été construit (prototype)? 
 
 L'instance de l'objet courant peut être la même pour l'ensemble des services si la portée du service est définie comme étant un _singleton_, ou être à chaque fois différente si la portée est définie comme _prototype_.
 
@@ -245,7 +245,7 @@ En interne, il est possible d'utiliser des stratégies de construction différen
 
 Puisque nous parlons de patrons de conception (design patterns), parlons du motif "Monteur".
 
-Vous serez sans doute d'accord avec moi pour dire qu'écrire un schéma entièrement à la main, en utilisant les classes dont nous avons parlé un peu plus haut peut s'avérer rapidement assez pénible. En tout cas, pour l'avoir expérimenté lors de l'écriture des tests, je ne peut pas dire qu'il s'agisse d'un gain de temps.
+Vous serez sans doute d'accord avec moi pour dire qu'écrire un schéma entièrement à la main, en utilisant les classes dont nous avons parlé un peu plus haut peut s'avérer rapidement assez pénible. En tout cas, pour l'avoir expérimenté lors de l'écriture des tests, je peux dire qu'il ne s'agit pas d'un gain de temps, loin de là.
 
 Une solution pratique consiste à utiliser le motif _Monteur_. L'idée est d'écrire le schéma sous une forme sympathique et facile à écrire pour nous, développeurs, et d'utiliser une classe intermédiaire pour transformer notre représentation du schéma dans la représentation compréhensible par notre composant.
 
@@ -255,9 +255,9 @@ Cette classe intermédiaire _monte_ donc notre schéma, en déchiffrant une autr
 
 Le premier type de _monteur_ qui me vient à l'esprit (le plus pratique, en fait), est le _monteur_ XML. Il est capable de lire un schéma, décrit au format XML, et de construire le schéma en utilisant les objets de notre bibliothèque. L'écriture du schéma XML à plusieurs avantages: il est facile à écrire, permet d'utiliser des outils extérieurs pour l'éditer facilement, et bénéficie, grâce a [XML Schema](http://fr.wikipedia.org/wiki/XML_Schema), d'une auto-complétion et d'une vérification à la volée, lors de l'écriture.
 
-Les injecteurs de dépendances ([Google Juice](http://code.google.com/p/google-guice/) et [Spring](www.springsource.org) permettent l'utilisation des annotations directement dans le code, pour définir les règles d'injection (le schéma pour nous).
+Les injecteurs de dépendances [Google Juice](http://code.google.com/p/google-guice/) et [Spring](www.springsource.org) permettent l'utilisation des annotations directement dans le code, pour définir les règles d'injection (le schéma pour nous).
 
-Malgré qu'il ne s'agisse pas d'un comportement recommandé (les annotations ne sont exploitables que par un type d'injecteur, même si [une spécification est actuellement en cours](http://jcp.org/en/jsr/summary?id=dependency+injection)), il est possible d'utiliser la réflexion sur un projet, et de la combiner a l'utilisation d'annotations pour déduire facilement la structure de notre schéma, pour le remplir ensuite à notre guise.
+Bien qu'il ne s'agisse pas d'un comportement recommandé (les annotations ne sont exploitables que par un type d'injecteur, même si [une spécification est actuellement en cours](http://jcp.org/en/jsr/summary?id=dependency+injection)), il est possible d'utiliser la réflexion sur un projet, et de la combiner a l'utilisation d'annotations pour déduire facilement la structure de notre schéma, pour le remplir ensuite à notre guise.
 
 Ce composant est également un _monteur_.
 
@@ -298,15 +298,14 @@ Maintenant, PHP 5.3 est disponible en version stable, et permet de faire fonctio
 
 Notre bibliothèque se sépare selon les espaces de noms suivants:
 
-* L'espace de nom `Construction`, qui contiens toutes les classes liées au concept de construction (les stratégies de construction)
-* L'espace de nom `Definition` , qui contiens le schéma.
-* L'espace de nom `Transformation` qui contiens les Dumpers et les _Monteurs_
+* L'espace de nom `Construction`, qui contient toutes les classes liées au concept de construction (les stratégies de construction)
+* L'espace de nom `Definition` , qui contient le schéma.
+* L'espace de nom `Transformation` qui contient les Dumpers et les _Monteurs_
 
 ### Développement piloté par les tests (TDD)
 Ce projet fut également l'occasion d'écrire nos premiers tests, pour finir par utiliser une approche pilotée par les tests.
 
-Le développement piloté par les tests préconise de réaliser ses tests **avant** d'écrire ses classes. Au début, ça chatouille un peu, mais on
-comprends rapidement l'intérêt de cette méthodologie, qui est une vraie bonne pratique.
+Le développement piloté par les tests préconise de réaliser ses tests **avant** d'écrire ses classes. Au début, ça chatouille un peu, mais on comprend rapidement l'intérêt de cette méthodologie, qui est une vraie bonne pratique.
 
 Écrire ses tests avant d'avoir codé la classe nous oblige à la fois à privilégier une utilisation logique de nos composants, et à fixer les interfaces. Le code produit est réellement comme on souhaite l'utiliser, et non pas comme il est plus facile de l'implémenter.
 
@@ -316,11 +315,11 @@ Pour revenir aux tests, ils permettent de tester que notre application se compor
 
 Rapidement, on écrit des tests pour tout: bugs, idées, etc. Ça favorise vraiment le développement d'une application.
 
-Un peu plus haut, je parlais de Mock objets (ou objets bouchon, en français). Je vous laisse consulter [l'article wikipédia sur les mocks]((http://en.wikipedia.org/wiki/Mock_object) pour vous faire une idée plus précise, mais il s'agit, rapidement, d'objets qui permettent de simuler le comportement d'autres objets, ces derniers pouvant communiquer avec le suite de tests.
+Un peu plus haut, je parlais de Mock objets (ou objets bouchon, en français). Je vous laisse consulter l'[article wikipédia sur les mocks](http://en.wikipedia.org/wiki/Mock_object) pour vous faire une idée plus précise, mais il s'agit, rapidement, d'objets qui permettent de simuler le comportement d'autres objets, ces derniers pouvant communiquer avec la suite de tests.
 
 ### Interfaces
 
-Dans l'ensemble de nos classes, nous essayons de travailler avec les interfaces plutôt qu'avec des implémentations particulières. 
+Dans l'ensemble de nos classes, nous essayons d'utiliser des interfaces plutôt que des implémentations particulières. 
 Pourquoi ? Parce que travailler avec des interfaces nous permet de changer à tout moment d'implémentation !
 
 Dans le cas d'Alice, elle n'est pas dépendante d'un type particulier de glace (celle à la fraise), mais simplement aux glaces, à l'_interface_ `Glace`, pour être exact.
@@ -342,11 +341,11 @@ D'ailleurs, l'écriture des classes en elle même est assez simple, une fois que
 
 Vous pouvez regarder le code sur [le dépôt mercurial de spiral](http://bitbucket.org/ametaireau/spiral/src/)
 
-Je ne vois pas grand chose à ajouter à propos de l'implémentation, si ce n'est peut être, qu'il est indispensable de commenter votre code: cela permet aux potentiels futur contributeurs de s'y retrouver facilement, et de comprendre comment tout cela fonctionne !
+Je ne vois pas grand chose à ajouter à propos de l'implémentation, si ce n'est, peut être, qu'il est indispensable de commenter votre code: cela permet aux potentiels futur contributeurs de s'y retrouver facilement, et de comprendre le détail des opérations !
 
 Conclusion
 -----------
 
 J'espère que cet article vous aura intéressé, en tout cas j'ai pris beaucoup de plaisir à l'écrire, et vous aurez au moins appris comment nous avons choisi d'implémenter un injecteur de dépendances en utilisant quelques bonnes pratiques logicielles !
 
-Si vous êtes intéressés pour discuter à ce propos, ou à propos d'autres concepts logiciels, vous pouvez me contacter sur alexis [chez] supinfo [point] com, je serais ravi d'échanger avec vous.
+Si vous êtes intéressés pour discuter à ce propos, ou à propos d'autres concepts logiciels, vous pouvez me contacter sur `alexis [chez] supinfo [point] com`, je serais ravi d'échanger avec vous.

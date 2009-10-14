@@ -88,7 +88,7 @@ Il est bien plus facile maintenant de choisir la glace à donner a Alice, et ain
 
 Ici, il subsiste des dépendances dans le code. Il s’agit de dépendances vis à vis de contrats (interfaces) et non d’implémentations données (classes), puisque j’ai choisi d’utiliser le paradigme de [programmation par contrats](http://fr.wikipedia.org/wiki/Programmation_par_contrat).
 
-Et c'est tout pour le principe d'inversion de contrôle (pas les glaces à la fraise, contrôler les dépendances)! Il s'agit _simplement_ du fait d'inverser le flux de contrôle de vos application, en délégant à un plus haut niveau la création des objets.
+Et c'est tout pour le principe d'inversion de contrôle (pas les glaces à la fraise, contrôler les dépendances)! Il s'agit _simplement_ du fait d'inverser le flux de contrôle de vos application, en déléguant à un plus haut niveau la création des objets.
 
 ### Injection de dépendances
 
